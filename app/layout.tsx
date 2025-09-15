@@ -17,6 +17,7 @@ export const metadata: Metadata = {
   description: "Quiosco Next.js",
 };
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100`}
       >
         {children}
       </body>
