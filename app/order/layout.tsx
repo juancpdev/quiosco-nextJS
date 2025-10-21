@@ -1,15 +1,17 @@
-import OrderSidebar from "@/components/order/orderSidebar";
-import OrderSummary from "@/components/order/orderSummary";
-
+import OrderSidebar from "@/components/order/OrderSidebar";
+import OrderSummary from "@/components/order/OrderSummary";
 
 export default function RootLayout({ children }: Readonly<{children: React.ReactNode;}>) {
     return (
         <>
-            <div className="lg:flex">
+            <div className="xl:flex">
                 <OrderSidebar />
 
-                <main className="lg:flex-1 lg:h-screen lg:overflow-y-scroll p-5">
-                    {children}
+                <main className="p-5 flex justify-center mt-10 xl:flex-1 xl:h-screen xl:overflow-y-scroll xl:mt-0">
+                    <div>
+                        <p className="font-bold text-xl text-center my-5 text-black xl:text-3xl xl:pb-2">Elegí y personalizá tu pedido</p>
+                        {children}
+                    </div>
                 </main>
 
                 <OrderSummary />
