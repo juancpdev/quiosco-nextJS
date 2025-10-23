@@ -29,7 +29,7 @@ export default function CategorySlider() {
   return (
     <nav ref={sliderRef} className="flex xl:flex-col keen-slider ">
       {categories.map((cat) => (
-        <div key={cat.id} className="keen-slider__slide flex justify-center items-center xl:border-b xl:border-gray-200 xl:h-24">
+        <div key={cat.id} className="keen-slider__slide flex justify-center items-center xl:border-b xl:rounded-b-xl xl:border-gray-200 ">
           <CategoryIcon category={cat} />
         </div>
       ))}
