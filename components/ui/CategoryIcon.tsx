@@ -14,7 +14,7 @@ export default function CategoryIcon({category} : CategoryIconProps) {
   return ( 
     <Link 
         href={`/order/${category.slug}`} 
-        className={` ${params.category === category.slug ? 'bg-orange-400 hover:bg-orange-400 xl:cursor-default' : 'xl:bg-white'} flex items-center gap-4 xl:w-full xl:h-20 rounded-xl p-3 last-of-type:border-none hover:bg-orange-50 transition-all`}
+        className={` ${params.category === category.slug ? 'bg-gradient-to-tl from-orange-200 to-orange-500  hover:bg-orange-400 xl:cursor-default' : 'xl:bg-white'} flex items-center gap-4 xl:w-full xl:h-20 rounded-xl p-3 last-of-type:border-none hover:bg-orange-50 transition-all`}
     >
         <div className='w-12 h-12 relative'>
             <Image

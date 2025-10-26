@@ -1,34 +1,41 @@
+"use client"
+
 import { useStore } from "@/src/store";
 import { OrderItem } from "@/src/types";
 import { formatCurrency } from "@/src/utils";
-import {
-  MinusIcon,
-  PlusIcon,
-  XMarkIcon,
-} from "@heroicons/react/16/solid";
+import { MinusIcon, PlusIcon, XMarkIcon } from "@heroicons/react/16/solid";
 import Image from "next/image";
 import { useMemo } from "react";
+import { motion } from "framer-motion"; // 👈 IMPORTANTE
 
 type ProductDetailsProp = {
   item: OrderItem;
 };
 
 export default function ProductDetails({ item }: ProductDetailsProp) {
+  const { increaseQuantity, decreaseQuantity, removeItem } = useStore();
+  const MIN_ITEM = 1;
+  const MAX_ITEM = 5;
 
-    const { increaseQuantity, decreaseQuantity, removeItem } = useStore()
-    const MIN_ITEM = 1
-    const MAX_ITEM = 5
-    const disabledButtonDecrease= useMemo(() => item.quantity === MIN_ITEM, [item])
-    const disabledButtonIncrease= useMemo(() => item.quantity === MAX_ITEM, [item])
+  const disabledButtonDecrease = useMemo(() => item.quantity === MIN_ITEM, [item]);
+  const disabledButtonIncrease = useMemo(() => item.quantity === MAX_ITEM, [item]);
 
   return (
-    <div className="flex justify-between items-center py-4 border-b border-gray-200 gap-3 relative px-4">
-        <div className="absolute top-0 right-0 bg-red-500 h-8 w-8 rounded-bl-xl cursor-pointer hover:bg-red-400 transition">
+    <motion.div
+      layout
+      initial={{ opacity: 0, x: 50 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -100 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="last-of-type:mb-5 bg-white rounded-xl flex justify-between items-center py-4 border-b border-gray-200 gap-3 relative px-4"
+    >
+      <div className="absolute top-0 right-0 bg-red-500 h-8 w-8 rounded-bl-xl cursor-pointer rounded-tr-xl hover:bg-red-400 transition">
         <XMarkIcon
-            className="text-white p-1.5"
-            onClick={() => removeItem(item.id)}
+          className="text-white p-1.5"
+          onClick={() => removeItem(item.id)}
         />
-        </div>
+      </div>
+
       {/* Izquierda: imagen y nombre */}
       <div>
         <div className="flex items-center gap-3">
@@ -70,18 +77,18 @@ export default function ProductDetails({ item }: ProductDetailsProp) {
           </div>
         </div>
         <div className="flex gap-2 mt-2">
-            <p className="font-bold text-[17px]">Subtotal:</p>
-            <p>{formatCurrency(item.subtotal)}</p>
+          <p className="font-bold text-[17px]">Subtotal:</p>
+          <p>{formatCurrency(item.subtotal)}</p>
         </div>
       </div>
 
       {/* Derecha: precio y eliminar */}
       <div className="flex flex-col items-end gap-2">
-            <div className="text-right leading-tight">
-            <p className="text-[13px] text-gray-600">Unidad</p>
+        <div className="text-right leading-tight">
+          <p className="text-[13px] text-gray-600">Unidad</p>
           <p className="font-bold text-[17px]">{formatCurrency(item.price)}</p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
