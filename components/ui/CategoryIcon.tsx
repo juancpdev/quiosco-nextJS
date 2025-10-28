@@ -20,7 +20,7 @@ export default function CategoryIcon({category} : CategoryIconProps) {
             <Image
                 fill
                 src={`/icon_${category.slug}.svg`} 
-                alt="Imagen Category" 
+                alt={`Imagen ${category.slug}`}
             />
         </div>
         <div className='justify-center items-center hidden xl:flex'>

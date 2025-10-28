@@ -27,7 +27,7 @@ export default function ProductDetails({ item }: ProductDetailsProp) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -100 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="last-of-type:mb-5 bg-white rounded-xl flex justify-between items-center py-4 border-b border-gray-200 gap-3 relative px-4"
+      className="last-of-type:mb-5 bg-white w-full max-w-xl rounded-xl flex justify-between items-center py-4 border-b border-gray-200 gap-3 relative px-4"
     >
       <div className="absolute top-0 right-0 bg-red-500 h-8 w-8 rounded-bl-xl cursor-pointer rounded-tr-xl hover:bg-red-400 transition">
         <XMarkIcon

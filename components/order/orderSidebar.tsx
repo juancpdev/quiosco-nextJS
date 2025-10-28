@@ -10,7 +10,7 @@ export default async function OrderSidebar() {
         </nav>
 
         <div className="mt-24 flex items-center justify-center w-full  xl:absolute xl:bottom-0 xl:left-0 xl:mb-5 xl:order-1">
-          <img className=" w-64 xl:w-50" src="/aria.png" alt="" />
+          <img className=" w-64 xl:w-50" src="/aria.png" alt="Logotipo" />
         </div>
         
     </aside>
