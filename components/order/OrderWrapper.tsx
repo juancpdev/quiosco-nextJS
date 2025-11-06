@@ -2,10 +2,12 @@
 import { useEffect, useState } from "react";
 import OrderSummary from "./OrderSummary";
 import OrderButton from "./OrderButton";
+import OrderModal from "./OrderModal";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function OrderWrapper() {
   const [orderActive, setOrderActive] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = orderActive ? "hidden" : "auto";
@@ -15,7 +17,7 @@ export default function OrderWrapper() {
     <>
       {/* Desktop: siempre visible */}
       <div className="hidden xl:block">
-        <OrderSummary />
+        <OrderSummary onOpenModal={() => setIsModalOpen(true)} />
       </div>
 
       {/* Mobile: animación desde abajo */}
@@ -28,7 +30,7 @@ export default function OrderWrapper() {
             transition={{ type: "tween", duration: 0.25 }}
             className="fixed inset-0 bg-white z-50 p-5 xl:hidden overflow-auto"
           >
-            <OrderSummary />
+            <OrderSummary onOpenModal={() => setIsModalOpen(true)} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -40,6 +42,9 @@ export default function OrderWrapper() {
           setOrderActive={setOrderActive}
         />
       </div>
+
+      {/* Modal fuera del árbol de OrderSummary */}
+      <OrderModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );
 }

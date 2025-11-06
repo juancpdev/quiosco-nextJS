@@ -5,7 +5,11 @@ import { useMemo } from "react";
 import { formatCurrency } from "@/src/utils";
 import { AnimatePresence, motion } from "framer-motion";
 
-export default function OrderSummary() {
+type OrderSummaryProps = {
+  onOpenModal: () => void;
+};
+
+export default function OrderSummary({ onOpenModal }: OrderSummaryProps) {
   const order = useStore((state) => state.order);
   const total = useMemo(
     () => order.reduce((total, item) => total + item.quantity * item.price, 0),
@@ -20,7 +24,7 @@ export default function OrderSummary() {
       ${!isEmpty ? "xl:overflow-y-scroll overflow-x-hidden" : ""}`}
     >
       <h1 className="text-3xl text-center font-black">Mi Pedido</h1>
-        
+
       <div
         className={`mt-5 rounded-xl transition-all duration-300 ${
           isEmpty ? "flex flex-col items-center justify-center h-[70vh]" : ""
@@ -32,7 +36,7 @@ export default function OrderSummary() {
               order.map((item) => <ProductDetails key={item.id} item={item} />)}
           </AnimatePresence>
         </div>
-              
+
         {isEmpty && (
           <motion.div
             initial={{ opacity: 0, y: 100 }}
@@ -54,12 +58,14 @@ export default function OrderSummary() {
 
       {/* FOOTER FIJO */}
       {!isEmpty && (
-        <div className="cursor-pointer fixed bottom-0 left-0 w-full xl:w-82 xl:left-auto bg-gradient-to-tr from-orange-200 to-orange-300  rounded-t-xl shadow-sm py-4 z-50 transition duration-400 hover:bg-gradient-to-tr hover:from-orange-500 hover:to-orange-200">
-          <p className="text-center text-lg">
-            Ir a pagar{" "}
-            <span className="font-bold">{formatCurrency(total)}</span>
-          </p>
-        </div>
+        <button
+          type="button"
+          className="cursor-pointer fixed bottom-0 left-0 w-full xl:w-82 xl:left-auto bg-gradient-to-tr from-orange-200 to-orange-300 rounded-t-xl shadow-sm py-4 z-50 transition duration-400 hover:bg-gradient-to-tr hover:from-orange-500 hover:to-orange-200"
+          onClick={onOpenModal}
+        >
+          Confirmar pedido{" "}
+          <span className="font-bold">{formatCurrency(total)}</span>
+        </button>
       )}
     </aside>
   );
