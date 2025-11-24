@@ -44,7 +44,11 @@ export default function OrderWrapper() {
       </div>
 
       {/* Modal fuera del árbol de OrderSummary */}
-      <OrderModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <OrderModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onCloseCart={() => setOrderActive(false)}  
+      />
     </>
   );
 }

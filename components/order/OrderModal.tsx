@@ -1,81 +1,186 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import PhoneVerification from "./PhoneVerification";
 import { toast } from "react-toastify";
+import MinimalCardPayment from "./MinimalCardPayment";
+import { useStore } from "@/src/store";
+import { createOrder } from "@/actions/create-order-actions";
+import { OrderSchema } from "@/src/schema";
 
-interface FormData {
+// Tipo para la información de pago con tarjeta
+export interface CardPaymentData {
+  paymentId?: string;
+  status?: string;
+  [key: string]: any;
+}
+
+export interface OrderFormData {
   name: string;
+  phone?: string;
   address?: string;
-  table?: string;
+  table?: number;
+  deliveryType?: "local" | "delivery";
+  paymentMethod?: "efectivo" | "tarjeta";
   note?: string;
+  total?: number;
+  order?: {
+    id: number;
+    name: string;
+    price: number;
+    quantity: number;
+  }[];
 }
 
 export default function OrderModal({
   isOpen,
   onClose,
+  onCloseCart
 }: {
   isOpen: boolean;
   onClose: () => void;
+  onCloseCart: () => void;
 }) {
-  const [orderType, setOrderType] = useState<"local" | "delivery" | "">(""); 
+  const [orderType, setOrderType] = useState<"local" | "delivery" | "">("");
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [phone, setPhone] = useState("");
+  const [resetKey, setResetKey] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState<"efectivo" | "tarjeta">("efectivo");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [formData, setFormData] = useState<OrderFormData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+
+  const { order, clearOrder } = useStore();
+
+  const total = useMemo(
+    () => order.reduce((acc, item) => acc + item.price * item.quantity, 0),
+    [order]
+  );
+
+  useEffect(() => {
+    reset({
+      name: "",
+      address: "",
+      table: undefined,
+      note: "",
+    });
+  }, [orderType]);
+
+  // Función de envío del pedido
+  const handleOrderConfirm = async (
+    formValues: OrderFormData,
+    paymentInfo?: any
+  ) => {
+    const data = {
+      ...formValues,
+      phone,
+      paymentMethod,
+      paymentInfo,
+      deliveryType: orderType,
+      order,
+      total,
+    };
+    setIsLoading(true);
+    const result = OrderSchema.safeParse(data);
+    console.log(result);
+
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        toast.error(issue.message);
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    const response = await createOrder(data);
+    if (response?.errors) {
+      response.errors.forEach((issue) => toast.error(issue.message));
+      setIsLoading(false);
+      return;
+    }
+
+    toast.success('Pedido confirmado')
+    clearOrder()
+    setIsLoading(false);
+    // Resetear todo
+
+    reset();
+    setOrderType("");
+    //setPhone("");
+    //setIsPhoneVerified(false);
+    setPaymentMethod("efectivo");
+    setFormData(null);
+    setShowPaymentModal(false);
+    onClose();
+    onCloseCart()
+  };
 
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isValid },
-  } = useForm<FormData>({
+    getValues,
+  } = useForm<OrderFormData>({
     mode: "onChange",
   });
 
   const handleClose = () => {
-    // ✅ Solo resetea el formulario y el tipo de pedido
-    // NO resetea phone ni isPhoneVerified
-
-    onClose();
-  };
-
-  // ✅ Nueva función para limpiar el teléfono (se pasa a PhoneVerification)
-  const handleClearPhone = () => {
-    setPhone("");
-    setIsPhoneVerified(false);
-  };
-
-  const onSubmit = () => {
-    if (!isPhoneVerified) {
-      toast.error("Verifica tu teléfono antes de confirmar el pedido", {
-        toastId: "verify-phone-error",
-      });
-      return;
-    }
-
-    toast.success("Pedido confirmado correctamente ", {
-      toastId: "pedido-confirmado",
-    });
-
-    // ✅ Al confirmar, limpia TODO incluyendo el teléfono
     reset();
     setOrderType("");
     setPhone("");
     setIsPhoneVerified(false);
+    setPaymentMethod("efectivo");
+    setFormData(null);
+    setShowPaymentModal(false);
     onClose();
+  };
+
+  const handleClearPhone = () => {
+    setPhone("");
+    setIsPhoneVerified(false);
+    setResetKey((prev) => prev + 1);
+  };
+
+  const handlePhoneError = () => {
+    setResetKey((prev) => prev + 1);
+  };
+
+  const handleButtonLocal = () => {
+    setOrderType("local");
+    setPaymentMethod("efectivo");
+  };
+
+  const handleMainButton = () => {
+    if (!isPhoneVerified) {
+      toast.error("Verifica tu teléfono antes de confirmar el pedido");
+      return;
+    }
+
+    const data = getValues();
+
+    if (paymentMethod === "efectivo") {
+      handleOrderConfirm(data);
+    } else {
+      // Guarda los datos del form ANTES de abrir Mercado Pago
+      setFormData(data);
+      setShowPaymentModal(true);
+    }
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="bg-white p-6 rounded-2xl w-[90%] max-w-md shadow-lg relative"
+            className="bg-white p-6 rounded-2xl w-[90%] max-w-md shadow-lg relative max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
@@ -91,11 +196,11 @@ export default function OrderModal({
               Confirmar pedido
             </h2>
 
-            {/* Selector tipo de pedido */}
             <div className="flex justify-center mb-6">
               <div>
                 <button
-                  onClick={() => setOrderType("local")}
+                  type="button"
+                  onClick={handleButtonLocal}
                   className={`px-4 py-2 rounded-tl-lg rounded-bl-lg font-semibold cursor-pointer ${
                     orderType === "local"
                       ? "bg-orange-400 text-white"
@@ -105,6 +210,7 @@ export default function OrderModal({
                   Local
                 </button>
                 <button
+                  type="button"
                   onClick={() => setOrderType("delivery")}
                   className={`px-4 py-2 rounded-tr-lg rounded-br-lg font-semibold cursor-pointer ${
                     orderType === "delivery"
@@ -117,11 +223,10 @@ export default function OrderModal({
               </div>
             </div>
 
-            {/* FORMULARIO DELIVERY */}
-            {orderType === "delivery" && (
+            {(orderType === "delivery" || orderType === "local") && (
               <motion.form
                 className="space-y-3"
-                onSubmit={handleSubmit(onSubmit)}
+                onSubmit={handleSubmit(handleMainButton)}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >
@@ -137,24 +242,58 @@ export default function OrderModal({
                   </p>
                 )}
 
-                <input
-                  type="text"
-                  placeholder="Dirección"
-                  {...register("address", { required: true })}
-                  className="w-full rounded-lg p-2 border-2 border-gray-100 bg-gray-100 focus:outline-none focus:border-orange-500"
-                />
-                {errors.address && (
-                  <p className="text-red-500 text-sm">
-                    Este campo es obligatorio
-                  </p>
+                {orderType === "delivery" && (
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Dirección"
+                      {...register("address", { required: true })}
+                      className="w-full rounded-lg p-2 border-2 border-gray-100 bg-gray-100 focus:outline-none focus:border-orange-500"
+                    />
+                    {errors.address && (
+                      <p className="text-red-500 text-sm">
+                        Este campo es obligatorio
+                      </p>
+                    )}
+                  </>
+                )}
+
+                {orderType === "local" && (
+                  <>
+                    <select
+                      {...register("table", {
+                        required: true,
+                        valueAsNumber: true,
+                      })}
+                      className="cursor-pointer w-full rounded-lg p-2 border-2 border-gray-100 bg-gray-100 focus:outline-none focus:border-orange-500"
+                      defaultValue=""
+                    >
+                      <option value="" disabled hidden>
+                        Elige una mesa
+                      </option>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <option key={n} value={n}>
+                          Mesa {n}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.table && (
+                      <p className="text-red-500 text-sm">
+                        Debes seleccionar una mesa
+                      </p>
+                    )}
+                  </>
                 )}
 
                 <PhoneVerification
+                  key={resetKey}
                   phone={phone}
                   setPhone={setPhone}
                   isVerified={isPhoneVerified}
                   setIsVerified={setIsPhoneVerified}
                   onClearPhone={handleClearPhone}
+                  resetKey={resetKey}
+                  onError={handlePhoneError}
                 />
 
                 <textarea
@@ -163,88 +302,62 @@ export default function OrderModal({
                   className="resize-none w-full rounded-lg p-2 border-2 border-gray-100 bg-gray-100 focus:outline-none focus:border-orange-500"
                 ></textarea>
 
+                {/* MÉTODO DE PAGO */}
+                {orderType === "delivery" && (
+                  <div>
+                    <label className="block font-semibold text-gray-700 mb-1">
+                      Método de pago
+                    </label>
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) =>
+                        setPaymentMethod(
+                          e.target.value as "efectivo" | "tarjeta"
+                        )
+                      }
+                      className="w-full cursor-pointer p-2 border-2 border-gray-100 bg-gray-100 rounded-lg focus:outline-none focus:border-orange-500"
+                    >
+                      <option value="efectivo">Efectivo</option>
+                      <option value="tarjeta">Tarjeta</option>
+                    </select>
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  disabled={!isValid || !isPhoneVerified}
-                  className={`w-full py-2 rounded-lg font-bold text-white transition ${
-                    !isValid || !isPhoneVerified
+                  disabled={!isValid || !isPhoneVerified || isLoading}
+                  className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg font-bold text-white transition ${
+                    !isValid || !isPhoneVerified || isLoading
                       ? "bg-gray-300 cursor-not-allowed"
                       : "bg-orange-400 hover:bg-orange-500 cursor-pointer"
                   }`}
                 >
-                  Confirmar pedido
-                </button>
-              </motion.form>
-            )}
-
-            {/* FORMULARIO LOCAL */}
-            {orderType === "local" && (
-              <motion.form
-                className="space-y-3"
-                onSubmit={handleSubmit(onSubmit)}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <input
-                  type="text"
-                  placeholder="Nombre y Apellido"
-                  {...register("name", { required: true })}
-                  className="w-full rounded-lg p-2 border-2 border-gray-100 bg-gray-100 focus:outline-none focus:border-orange-500"
-                />
-                {errors.name && (
-                  <p className="text-red-500 text-sm">
-                    Este campo es obligatorio
-                  </p>
-                )}
-
-                <select
-                  {...register("table", { required: true })}
-                  className="cursor-pointer w-full rounded-lg p-2 border-2 border-gray-100 bg-gray-100 focus:outline-none focus:border-orange-500"
-                  defaultValue=""
-                >
-                  <option value="" disabled hidden>
-                    Elige una mesa
-                  </option>
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <option key={n} value={n}>
-                      Mesa {n}
-                    </option>
-                  ))}
-                </select>
-                {errors.table && (
-                  <p className="text-red-500 text-sm">
-                    Debes seleccionar una mesa
-                  </p>
-                )}
-
-                <PhoneVerification
-                  phone={phone}
-                  setPhone={setPhone}
-                  isVerified={isPhoneVerified}
-                  setIsVerified={setIsPhoneVerified}
-                  onClearPhone={handleClearPhone}
-                />
-
-                <textarea
-                  placeholder="Nota"
-                  {...register("note")}
-                  className="resize-none w-full rounded-lg p-2 border-2 border-gray-100 bg-gray-100 focus:outline-none focus:border-orange-500"
-                ></textarea>
-
-                <button
-                  type="submit"
-                  disabled={!isValid || !isPhoneVerified}
-                  className={`w-full py-2 rounded-lg font-bold text-white transition ${
-                    !isValid || !isPhoneVerified
-                      ? "bg-gray-300 cursor-not-allowed"
-                      : "bg-orange-400 hover:bg-orange-500 cursor-pointer"
-                  }`}
-                >
-                  Confirmar pedido
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : paymentMethod === "tarjeta" ? (
+                    "Ir a pagar"
+                  ) : (
+                    "Confirmar pedido"
+                  )}
                 </button>
               </motion.form>
             )}
           </motion.div>
+
+          {/* Modal de pago con tarjeta */}
+          {showPaymentModal && formData && (
+            <MinimalCardPayment
+              formData={formData}
+              onClose={() => setShowPaymentModal(false)}
+              onPaymentSuccess={(paymentData) => {
+                handleOrderConfirm(formData, paymentData);
+              }}
+              onPaymentError={(error) => {
+                console.error("Error en el pago:", error);
+                toast.error("Error al procesar el pago");
+              }}
+            />
+          )}
         </motion.div>
       )}
     </AnimatePresence>
