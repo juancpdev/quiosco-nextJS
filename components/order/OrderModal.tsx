@@ -33,6 +33,7 @@ export interface OrderFormData {
   }[];
 }
 
+
 export default function OrderModal({
   isOpen,
   onClose,
@@ -51,6 +52,18 @@ export default function OrderModal({
   const [formData, setFormData] = useState<OrderFormData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/verify-token")
+      .then((res) => res.json())
+      .then((data) => {
+        setIsAdmin(data.valid);
+        if (data.valid) {
+          setIsPhoneVerified(true); 
+        }
+      });
+  }, []);
 
   const { order, clearOrder } = useStore();
 
@@ -108,8 +121,8 @@ export default function OrderModal({
 
     reset();
     setOrderType("");
-    //setPhone("");
-    //setIsPhoneVerified(false);
+    setPhone("");
+    setIsPhoneVerified(false);
     setPaymentMethod("efectivo");
     setFormData(null);
     setShowPaymentModal(false);
@@ -154,7 +167,7 @@ export default function OrderModal({
   };
 
   const handleMainButton = () => {
-    if (!isPhoneVerified) {
+   if (!isPhoneVerified && !isAdmin) {
       toast.error("Verifica tu teléfono antes de confirmar el pedido");
       return;
     }
@@ -285,17 +298,19 @@ export default function OrderModal({
                   </>
                 )}
 
-                <PhoneVerification
-                  key={resetKey}
-                  phone={phone}
-                  setPhone={setPhone}
-                  isVerified={isPhoneVerified}
-                  setIsVerified={setIsPhoneVerified}
-                  onClearPhone={handleClearPhone}
-                  resetKey={resetKey}
-                  onError={handlePhoneError}
-                />
-
+                {!isAdmin && (
+                  <PhoneVerification
+                    key={resetKey}
+                    phone={phone}
+                    setPhone={setPhone}
+                    isVerified={isPhoneVerified}
+                    setIsVerified={setIsPhoneVerified}
+                    onClearPhone={handleClearPhone}
+                    resetKey={resetKey}
+                    onError={handlePhoneError}
+                  />
+                )}
+                
                 <textarea
                   placeholder="Nota"
                   {...register("note")}
