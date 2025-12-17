@@ -12,6 +12,7 @@ type NavigationItem = {
 
 const adminNavigation: NavigationItem[] = [
   { url: "/admin/orders", text: "Ordenes" },
+  { url: "/admin/tables", text: "Mesas" },
   { url: "/admin/products", text: "Productos" },
   { url: "/order/cafe", text: "Ver Quiosco" },
 ];

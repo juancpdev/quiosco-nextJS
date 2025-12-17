@@ -5,7 +5,9 @@ import { prisma } from "@/src/lib/prisma";
 async function getPendingOrders() {
   const orders = await prisma.order.findMany({
     where: {
-      status: false
+      status: {
+        in: ["pending", "preparing", "ready"] // ✅ Ahora es string
+      }
     },
     include: {
       orderProducts: {
@@ -13,6 +15,9 @@ async function getPendingOrders() {
           product: true
         }
       }
+    },
+    orderBy: {
+      date: 'desc'
     }
   })
   return orders

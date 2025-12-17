@@ -8,6 +8,8 @@ import MinimalCardPayment from "./MinimalCardPayment";
 import { useStore } from "@/src/store";
 import { createOrder } from "@/actions/create-order-actions";
 import { OrderSchema } from "@/src/schema";
+import { checkTableAvailability } from '@/actions/table-actions'
+import TableSelector from "./TableSelector";
 
 // Tipo para la información de pago con tarjeta
 export interface CardPaymentData {
@@ -80,7 +82,7 @@ export default function OrderModal({
       note: "",
     });
   }, [orderType]);
-
+  
   // Función de envío del pedido
   const handleOrderConfirm = async (
     formValues: OrderFormData,
@@ -136,6 +138,8 @@ export default function OrderModal({
     reset,
     formState: { errors, isValid },
     getValues,
+    watch, 
+    setValue 
   } = useForm<OrderFormData>({
     mode: "onChange",
   });
@@ -166,22 +170,44 @@ export default function OrderModal({
     setPaymentMethod("efectivo");
   };
 
-  const handleMainButton = () => {
-   if (!isPhoneVerified && !isAdmin) {
-      toast.error("Verifica tu teléfono antes de confirmar el pedido");
-      return;
-    }
+const handleMainButton = async () => {
+  if (!isPhoneVerified && !isAdmin) {
+    toast.error("Verifica tu teléfono antes de confirmar el pedido");
+    return;
+  }
 
-    const data = getValues();
+  const data = getValues();
 
-    if (paymentMethod === "efectivo") {
-      handleOrderConfirm(data);
-    } else {
-      // Guarda los datos del form ANTES de abrir Mercado Pago
-      setFormData(data);
-      setShowPaymentModal(true);
+  // ✨ VALIDACIÓN CON TELÉFONO
+  if (orderType === 'local' && data.table) {
+    const availability = await checkTableAvailability(data.table);
+    
+    if (!availability.available) {
+      // Si es admin, permitir siempre
+      if (isAdmin) {
+        // Admin puede agregar a cualquier mesa
+        console.log("Admin agregando pedido a mesa ocupada");
+      } else {
+        // Si es cliente, verificar que el teléfono coincida
+        if (availability.phone !== phone) {
+          toast.error(
+            `La Mesa ${data.table} ya está ocupada por otro cliente. Verifica tu número de mesa.`
+          );
+          return;
+        }
+        // Si el teléfono coincide, continuar
+        console.log("Teléfono coincide, agregando pedido a la mesa");
+      }
     }
-  };
+  }
+  
+  if (paymentMethod === "efectivo") {
+    handleOrderConfirm(data);
+  } else {
+    setFormData(data);
+    setShowPaymentModal(true);
+  }
+};
 
   return (
     <AnimatePresence>
@@ -271,31 +297,12 @@ export default function OrderModal({
                   </>
                 )}
 
-                {orderType === "local" && (
-                  <>
-                    <select
-                      {...register("table", {
-                        required: true,
-                        valueAsNumber: true,
-                      })}
-                      className="cursor-pointer w-full rounded-lg p-2 border-2 border-gray-100 bg-gray-100 focus:outline-none focus:border-orange-500"
-                      defaultValue=""
-                    >
-                      <option value="" disabled hidden>
-                        Elige una mesa
-                      </option>
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <option key={n} value={n}>
-                          Mesa {n}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.table && (
-                      <p className="text-red-500 text-sm">
-                        Debes seleccionar una mesa
-                      </p>
-                    )}
-                  </>
+                {orderType === 'local' && (
+                  <TableSelector
+                    value={watch('table')}
+                    onChange={(tableNumber) => setValue('table', tableNumber)}
+                    error={errors.table?.message}
+                  />
                 )}
 
                 {!isAdmin && (

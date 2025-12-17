@@ -4,27 +4,41 @@ import { OrderWithProducts } from "@/src/types"
 import { COLORS, formatCurrency } from "@/src/utils"
 import { Bike, Store } from "lucide-react"
 import Image from "next/image"
+import { completeOrder } from "@/actions/complete-order-actions" // ✅ Importar action
+import { toast } from "react-toastify"
+import { useRouter } from "next/navigation"
 
 type OrderCardProps = {
     order: OrderWithProducts
 }
 
 export default function OrderCard({ order } : OrderCardProps) {
-    // Define si es local o delivery
+    const router = useRouter()
     const isLocal = order.deliveryType === 'local'
     
-    // Selecciona los colores según el tipo
     const bgColor = isLocal ? COLORS.primary[100] : COLORS.secondary[100]
     const borderColor = isLocal ? COLORS.primary[200] : COLORS.secondary[200]
     const buttonBg = isLocal ? COLORS.primary[500] : COLORS.secondary[400]
     const buttonHover = isLocal ? COLORS.primary[600] : COLORS.secondary[500]
+
+    const handleComplete = async (e: React.FormEvent) => {
+        e.preventDefault()
+        
+        const result = await completeOrder(order.id)
+        
+        if (result.success) {
+            toast.success("Orden completada")
+            router.refresh()
+        } else {
+            toast.error("Error al completar la orden")
+        }
+    }
 
     return (
         <section
             aria-labelledby="summary-heading"
             className="shadow-lg rounded-2xl bg-white px-4 py-6 sm:p-6 lg:p-8 space-y-4 relative"
         >
-            {/* Ícono de tipo de entrega */}
             <div 
                 className="absolute right-0 top-0 border shadow rounded-bl-lg rounded-tr-lg p-2"
                 style={{
@@ -61,7 +75,6 @@ export default function OrderCard({ order } : OrderCardProps) {
                 #{order.id}
             </div>
 
-            {/* Información del cliente */}
             <div className="space-y-2 mt-5">
                 <p className='text-lg text-gray-900'>
                     <strong>Cliente:</strong> {order.name}
@@ -84,7 +97,6 @@ export default function OrderCard({ order } : OrderCardProps) {
                 )}
             </div>
 
-            {/* Productos */}
             <dl className="mt-6 ">
                 {order.orderProducts.map(product => (
                     <div
@@ -107,14 +119,12 @@ export default function OrderCard({ order } : OrderCardProps) {
                     </div>
                 ))}
 
-                {/* Nota del cliente */}
                 {order.note && (
                     <p className='text-md text-gray-900 border-t border-gray-200 py-3'>
                         <strong>Nota:</strong> {order.note}
                     </p>
                 )}
 
-                {/* Total */}
                 <div className="flex items-center justify-between border-t border-gray-200 py-2">
                     <dt className="text-base font-medium text-gray-900">
                         {order.paymentMethod === 'efectivo' ? 'Total a Pagar:' : 'Pagado:'}
@@ -125,8 +135,7 @@ export default function OrderCard({ order } : OrderCardProps) {
                 </div>
             </dl>
 
-            {/* Botón de completar */}
-            <form>
+            <form onSubmit={handleComplete}>
                 <input
                     type="submit"
                     className="transition-colors text-white w-full mt-5 p-3 rounded-xl uppercase font-bold cursor-pointer"
