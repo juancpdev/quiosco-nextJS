@@ -54,6 +54,7 @@ model Order {
   status        String          @default("pending") // ✨ CAMBIO: de Boolean a String
   // Estados: "pending" | "preparing" | "ready" | "completed" | "cancelled"
   orderReadyAt  DateTime?
+  createdBy     String          @default("client")
   orderProducts OrderProducts[]
 }
 

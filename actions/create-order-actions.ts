@@ -95,6 +95,7 @@ export async function createOrder(data: unknown, isAdmin: boolean = false) {
         total: result.data.total,
         paymentInfo: result.data.paymentInfo,
         status: "pending",
+        createdBy: isAdmin ? "admin" : "client",
         orderProducts: {
           create: result.data.order.map((product) => ({
             productId: product.id,
