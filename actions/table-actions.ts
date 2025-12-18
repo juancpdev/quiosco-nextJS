@@ -50,6 +50,39 @@ export async function createTables(count: number) {
   }
 }
 
+export async function updateTableNumber(tableId: number, newNumber: number) {
+  try {
+    // 1️⃣ Verificar si ya existe otra mesa con ese número
+    const existingTable = await prisma.table.findUnique({
+      where: { number: newNumber },
+    });
+
+    if (existingTable) {
+      return {
+        success: false,
+        error: `Ya existe la mesa ${newNumber}`,
+      };
+    }
+
+    // 2️⃣ Actualizar número de la mesa
+    await prisma.table.update({
+      where: { id: tableId },
+      data: { number: newNumber },
+    });
+
+    // 3️⃣ Revalidar path para refrescar UI
+    revalidatePath("/admin/tables");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating table number:", error);
+    return {
+      success: false,
+      error: "No se pudo actualizar la mesa",
+    };
+  }
+}
+
 // Eliminar una mesa
 export async function deleteTable(tableNumber: number) {
   try {
