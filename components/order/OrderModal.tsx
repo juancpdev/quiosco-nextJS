@@ -90,12 +90,13 @@ export default function OrderModal({
   ) => {
     const data = {
       ...formValues,
-      phone,
+      phone: isAdmin ? undefined : phone,
       paymentMethod,
       paymentInfo,
       deliveryType: orderType,
       order,
       total,
+      isAdminOrder: isAdmin,
     };
     setIsLoading(true);
     const result = OrderSchema.safeParse(data);
@@ -347,7 +348,7 @@ const handleMainButton = async () => {
 
                 <button
                   type="submit"
-                  disabled={!isValid || !isPhoneVerified || isLoading}
+                  disabled={!isValid || (!isPhoneVerified && !isAdmin) || isLoading}
                   className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg font-bold text-white transition ${
                     !isValid || !isPhoneVerified || isLoading
                       ? "bg-gray-300 cursor-not-allowed"

@@ -152,7 +152,7 @@ export async function getTablesWithOrders() {
       orders: {
         where: {
           status: {
-            in: ["pending", "preparing", "ready"]
+            in: ["pending", "completed"]
           }
         },
         include: {
@@ -172,39 +172,51 @@ export async function getTablesWithOrders() {
   return tables;
 }
 
-// Cerrar mesa
-export async function closeTable(tableId: number) {
+export async function closeTable(
+  tableId: number, 
+  paymentMethod: 'efectivo' | 'tarjeta'
+) {
   try {
-    await prisma.order.updateMany({
-      where: {
-        tableId: tableId,
-        status: {
-          in: ["pending", "preparing", "ready"]
-        }
-      },
-      data: {
-        status: "completed",
-        orderReadyAt: new Date()
-      }
+    // 1️⃣ Traer todas las órdenes de la mesa
+    const orders = await prisma.order.findMany({
+      where: { tableId }
     });
 
+    // 2️⃣ Verificar si hay órdenes pendientes
+    const hasPendingOrders = orders.some(order => order.status !== 'completed');
+    if (hasPendingOrders) {
+      return { 
+        success: false, 
+        error: 'No se puede cerrar la mesa, hay órdenes pendientes' 
+      };
+    }
+
+    // 3️⃣ Guardar el método de pago en las órdenes (solo para métricas)
+    await prisma.order.updateMany({
+      where: { tableId },
+      data: { paymentMethod }
+    });
+
+    // 4️⃣ Liberar la mesa
     await prisma.table.update({
       where: { id: tableId },
       data: {
-        status: "available",
+        status: 'available',
         sessionId: null
       }
     });
 
-    revalidatePath("/admin/orders");
-    revalidatePath("/admin/tables");
-    
+    // 5️⃣ Revalidar paths para refrescar UI
+    revalidatePath('/admin/tables');
+    revalidatePath('/admin/orders');
+
     return { success: true };
   } catch (error) {
-    console.error("Error closing table:", error);
-    return { success: false, error: "Error al cerrar la mesa" };
+    console.error('Error closing table:', error);
+    return { success: false, error: 'Error al cerrar la mesa' };
   }
 }
+
 
 // Obtener resumen de una mesa específica
 export async function getTableSummary(tableNumber: number) {
@@ -214,7 +226,7 @@ export async function getTableSummary(tableNumber: number) {
       orders: {
         where: {
           status: {
-            in: ["pending", "preparing", "ready"]
+            in: ["pending", "completed"]
           }
         },
         include: {
@@ -242,6 +254,6 @@ export async function getTableSummary(tableNumber: number) {
     orders: table.orders,
     totalAmount,
     customerName: table.orders[0]?.name || "",
-    phone: table.orders[0]?.phone || ""
+    phone: table.orders[0]?.phone || "",
   };
 }
