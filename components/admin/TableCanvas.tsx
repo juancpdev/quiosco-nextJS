@@ -3,10 +3,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { Table } from '@prisma/client'
 import { updateTablePosition } from '@/actions/table-actions'
-import { Store, Move, X } from 'lucide-react'
+import { Store, Move, X, Plus } from 'lucide-react'
 import { TableWithOrders } from '@/src/types'
 import TableSummaryModal from './TableSummaryModal'
 import EditTableModal from './EditTableModal'
+import CreateTableModal from './CreateTableModal'
 
 type TableCanvasProps = {
   tables: Table[]
@@ -27,6 +28,7 @@ export default function TableCanvas({ tables, occupiedTables }: TableCanvasProps
   const [selectedTable, setSelectedTable] = useState<TableWithOrders | null>(null)
   const [selectedTableId, setSelectedTableId] = useState<number | null>(null)
   const [editTable, setEditTable] = useState<Table | null>(null)
+  const [createTable, setCreateTable] = useState<true | false>(false)
   const canvasRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
   const dragStartRef = useRef<{ x: number; y: number } | null>(null)
@@ -139,24 +141,46 @@ export default function TableCanvas({ tables, occupiedTables }: TableCanvasProps
     }
   }
 
+  const addTable = () => {
+    setCreateTable(true)
+  }
+
   return (
     <div className="relative">
       {/* Botón de modo edición */}
       <div className="mb-4 flex justify-between items-center">
-        <button
-          onClick={() => {
-            setEditMode(!editMode)
-            setSelectedTable(null)
-          }}
-          className={`px-4 py-2 cursor-pointer rounded-lg font-semibold flex items-center gap-2 transition-all
-            ${editMode 
-              ? 'bg-orange-500 hover:bg-orange-600 text-white' 
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-            }`}
-        >
-          <Move size={20} />
-          {editMode ? 'Finalizar Edición' : 'Configurar Mesas'}
-        </button>
+        <div className='flex gap-5'>
+          <button
+            onClick={() => {
+              setEditMode(!editMode)
+              setSelectedTable(null)
+            }}
+            className={`px-4 py-2 cursor-pointer rounded-lg font-semibold flex items-center gap-2 transition-all
+              ${editMode 
+                ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+              }`}
+          >
+            <Move size={20} />
+            {editMode ? 'Finalizar Edición' : 'Configurar Mesas'}
+          </button>
+
+          {editMode && (
+            <button
+            onClick={() => {
+              addTable()
+            }}
+            className={`px-4 py-2 cursor-pointer rounded-lg font-semibold flex items-center gap-2 transition-all
+              ${editMode 
+                ? 'bg-green-500 hover:bg-green-600 text-white' 
+                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+              }`}
+          >
+            <Plus size={20} />
+            Agregar mesa
+          </button>
+          )}
+        </div>
 
         {editMode && (
           <p className="text-sm text-orange-600 font-medium">
@@ -171,6 +195,13 @@ export default function TableCanvas({ tables, occupiedTables }: TableCanvasProps
           table={editTable}
           onClose={handleCloseModal}
           onUpdateSuccess={handleUpdateSuccess}
+        />
+      )}
+
+      {/* Modal de creacion */}
+      {createTable && (
+        <CreateTableModal
+          onClose={() => setCreateTable(false)} // ✅ Agregar onClose
         />
       )}
 

@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getAllTables } from '@/actions/table-actions'
 import { Table } from '@prisma/client'
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { Store } from 'lucide-react'
 
 type TableSelectorProps = {
   value: number | undefined
@@ -13,80 +13,86 @@ type TableSelectorProps = {
 
 export default function TableSelector({ value, onChange, error }: TableSelectorProps) {
   const [tables, setTables] = useState<Table[]>([])
-  const [loading, setLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    const loadTables = async () => {
+      setIsLoading(true)
+      const allTables = await getAllTables()
+      setTables(allTables)
+      setIsLoading(false)
+    }
     loadTables()
   }, [])
 
-  const loadTables = async () => {
-    const allTables = await getAllTables()
-    setTables(allTables)
-    setLoading(false)
+  if (isLoading) {
+    return (
+      <div className="w-full p-4 bg-gray-100 rounded-lg flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )
   }
 
-  if (loading) {
+  if (tables.length === 0) {
     return (
-      <div className="py-4">
-        <p className="text-gray-500">Cargando mesas...</p>
+      <div className="w-full p-4 bg-gray-100 rounded-lg text-center text-gray-500 text-sm">
+        No hay mesas disponibles. Contacta al administrador.
       </div>
     )
   }
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-3">
+      <label className="block font-semibold text-gray-700 mb-2 text-sm">
         Selecciona tu mesa
       </label>
-      
-      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3">
-        {tables.map(table => {
-          const isAvailable = table.status === 'available'
+      <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-6 gap-2">
+        {tables.map((table) => {
           const isSelected = value === table.number
+          const isOccupied = table.status === 'occupied'
 
           return (
             <button
               key={table.id}
               type="button"
-              onClick={() => onChange(table.number)} // ✅ SIEMPRE se puede seleccionar
+              onClick={() => onChange(table.number)}
               className={`
-                relative aspect-square rounded-xl p-3 transition-all duration-200
-                flex flex-col items-center justify-center gap-1
-                ${isSelected 
-                  ? 'bg-orange-500 text-white ring-4 ring-orange-200 scale-105'
-                  : isAvailable
-                    ? 'bg-green-50 hover:bg-green-100 text-green-700 border-2 border-green-200 hover:scale-105'
-                    : 'bg-red-50 hover:bg-red-100 text-red-500 border-2 border-red-200'
+                relative cursor-pointer aspect-square rounded-lg p-2 flex flex-col items-center justify-center
+                transition-all duration-200 font-bold text-sm
+                ${isSelected
+                  ? 'bg-orange-500 text-white ring-2 ring-orange-300 scale-105'
+                  : isOccupied
+                    ? 'bg-red-200 text-red-700 border-2 border-red-300 hover:bg-red-200'
+                    : 'bg-green-100 text-green-700 border-2 border-green-300 hover:bg-green-200'
                 }
               `}
             >
-              <span className="text-xl font-bold">
-                {table.number}
-              </span>
+              <Store size={14} className="mb-0.5" />
+              <span>{table.number}</span>
               
-              {isAvailable ? (
-                <CheckCircle2 size={16} className={isSelected ? 'text-white' : 'text-green-500'} />
-              ) : (
-                <XCircle size={16} className="text-red-500" />
+              {/* Badge de estado */}
+              {isOccupied && !isSelected && (
+                <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
               )}
-              
-              <span className="text-xs mt-1">
-                {isAvailable ? 'Libre' : 'Ocupada'}
-              </span>
             </button>
           )
         })}
       </div>
+      
+      {/* Leyenda */}
+      <div className="flex gap-4 mt-3 text-xs">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 bg-green-500 border border-green-300 rounded"></div>
+          <span className="text-gray-600">Disponible</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 bg-red-500 border border-red-300 rounded"></div>
+          <span className="text-gray-600">En uso</span>
+        </div>
+      </div>
 
       {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
-      )}
-
-      {value && (
-        <p className="mt-3 text-sm text-gray-600">
-          Mesa seleccionada:{' '}
-          <strong className="text-orange-600">Mesa {value}</strong>
-        </p>
+        <p className="text-red-500 text-sm mt-2">{error}</p>
       )}
     </div>
   )

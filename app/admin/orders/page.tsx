@@ -15,7 +15,7 @@ async function getPendingOrders() {
       }
     },
     orderBy: {
-      date: 'desc'
+      date: 'asc'
     }
   })
   return orders
