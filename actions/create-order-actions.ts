@@ -14,6 +14,33 @@ export async function createOrder(data: unknown, isAdmin: boolean = false) {
     };
   }
 
+   const { order } = result.data
+
+    // ✅ NUEVA VALIDACIÓN: Verificar disponibilidad de productos
+    const productIds = order.map(item => item.id)
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: productIds }
+      },
+      select: {
+        id: true,
+        name: true,
+        available: true
+      }
+    })
+
+    // Encontrar productos no disponibles
+    const unavailableProducts = products.filter(p => !p.available)
+    
+    if (unavailableProducts.length > 0) {
+      return {
+        errors: [{
+          message: `Productos no disponibles: ${unavailableProducts.map(p => p.name).join(', ')}`,
+          path: ['products']
+        }]
+      }
+    }
+
   try {
     let tableId: number | undefined;
     let sessionId: string | undefined;
@@ -32,7 +59,7 @@ export async function createOrder(data: unknown, isAdmin: boolean = false) {
           orders: {
             where: {
               status: {
-                in: ["pending", "preparing", "ready"]
+                in: ["pending", "completed"]
               },
               ...(phone ? { phone } : {}), // ✅ SOLO filtra por teléfono si existe
             },
@@ -84,7 +111,7 @@ export async function createOrder(data: unknown, isAdmin: boolean = false) {
     await prisma.order.create({
       data: {
         name: result.data.name,
-        phone: phone, // ✅ Puede ser null para admin
+        phone: phone, // ✅ Puede ser null para admin 
         address: result.data.address,
         deliveryType: result.data.deliveryType,
         table: result.data.table,

@@ -19,6 +19,7 @@ model Product {
   name       String
   price      Float
   image      String
+  available  Boolean         @default(true)
   categoryId Int
   category   Category        @relation(fields: [categoryId], references: [id])
   orderItems OrderProducts[]
@@ -29,8 +30,8 @@ model Table {
   number    Int      @unique
   status    String   @default("available")
   sessionId String?
-  positionX Float    @default(0)  // ✨ Posición X en el canvas
-  positionY Float    @default(0)  // ✨ Posición Y en el canvas
+  positionX Float    @default(0) 
+  positionY Float    @default(0) 
   orders    Order[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -43,16 +44,15 @@ model Order {
   address       String?
   deliveryType  String          // "local" | "delivery"
   table         Int?
-  tableId       Int?            // ✨ NUEVO: Relación con Table
+  tableId       Int?            
   tableModel    Table?          @relation(fields: [tableId], references: [id])
-  sessionId     String?         // ✨ NUEVO: Para agrupar órdenes de la misma mesa
+  sessionId     String?         // agrupar órdenes de la misma mesa
   paymentMethod String          // "efectivo" | "tarjeta"
   note          String?
   total         Float
   paymentInfo   Json?
   date          DateTime        @default(now())
-  status        String          @default("pending") // ✨ CAMBIO: de Boolean a String
-  // Estados: "pending" | "preparing" | "ready" | "completed" | "cancelled"
+  status        String          @default("pending") // "pending" | "completed"
   orderReadyAt  DateTime?
   createdBy     String          @default("client")
   orderProducts OrderProducts[]

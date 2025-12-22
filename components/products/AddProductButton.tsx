@@ -7,10 +7,11 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export type AddProductButtonProps = {
-  product: Product;
+  product: Product,
+  isAvailable: boolean
 };
 
-export default function AddProductButton({ product }: AddProductButtonProps) {
+export default function AddProductButton({ product, isAvailable }: AddProductButtonProps) {
   const addToOrder = useStore((state) => state.addToOrder);
   const { order } = useStore();
   const [added, setAdded] = useState(false);
@@ -21,7 +22,7 @@ export default function AddProductButton({ product }: AddProductButtonProps) {
   const isMax = currentQuantity >= 5; // condición para bloquear
 
   const handleClick = () => {
-    if (isMax) return; // si ya hay 5, no hace nada
+    if (isMax || !isAvailable) return;
     addToOrder(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 1000);
@@ -31,7 +32,7 @@ export default function AddProductButton({ product }: AddProductButtonProps) {
     <button
       className={`relative m-3 font-bold transition w-8 h-8 flex items-center justify-center
                 ${
-                  isMax
+                  isMax || !isAvailable
                     ? "text-gray-200 cursor-not-allowed"
                     : "text-orange-400 hover:text-orange-300 cursor-pointer "
                 }`}
