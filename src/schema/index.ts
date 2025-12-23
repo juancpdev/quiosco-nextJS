@@ -64,3 +64,9 @@ export const OrderSchema = z.object({
 
 // Type inference para TypeScript
 export type OrderType = z.infer<typeof OrderSchema>
+
+export const SearchSchema = z.object({
+  search : z.string()
+              .trim()
+              .min(1, {message: 'El campo no puede ir vacio'})
+})

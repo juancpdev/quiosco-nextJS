@@ -68,8 +68,8 @@ const handleToggle = async () => {
 
 export default function ProductTable({ products }: ProductTableType) {
   return (
-    <div className="px-4 sm:px-6 lg:px-8 mt-20">
-      <div className="mt-8 flow-root">
+    <div className="px-4 sm:px-6 lg:px-8 ">
+      <div className="mt-12 flow-root">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 bg-white p-5 rounded-lg shadow">
             <table className="min-w-full divide-y divide-gray-300">
@@ -119,8 +119,8 @@ export default function ProductTable({ products }: ProductTableType) {
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
                       {product.name}
                     </td>
-                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
-                      <div className="w-16 h-16 relative">
+                    <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                      <div className="w-12 h-12 relative">
                         <Image
                           className="rounded-xl object-cover"
                           src={`/products/${product.image}.jpg`}

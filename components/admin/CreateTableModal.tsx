@@ -47,7 +47,7 @@ export default function CreateTableModal({ onClose }: CreateTableModalProps) {
         <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-full p-2 transition"
+            className="absolute cursor-pointer top-4 right-4 text-white hover:bg-white/20 rounded-full p-2 transition"
           >
             <X size={24} />
           </button>
@@ -109,14 +109,14 @@ export default function CreateTableModal({ onClose }: CreateTableModalProps) {
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 py-3 px-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-xl transition"
+              className="flex-1 cursor-pointer py-3 px-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-xl transition"
             >
               Cancelar
             </button>
             <button
               onClick={handleCreate}
               disabled={isLoading || count < 1}
-              className="flex-1 py-3 px-6 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 cursor-pointer py-3 px-6 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
