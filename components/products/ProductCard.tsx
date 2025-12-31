@@ -1,4 +1,4 @@
-import { formatCurrency } from "@/src/utils";
+import { formatCurrency, getImagePath } from "@/src/utils";
 import { Product } from "@prisma/client";
 import Image from "next/image";
 import AddProductButton from "./AddProductButton";
@@ -10,6 +10,7 @@ type ProductCardProps = {
 export default function ProductCard({ product }: ProductCardProps) {
 
   const isAvailable = product.available
+  const imagePath = getImagePath(product.image)
 
   return (
     <div className={`shadow-sm border border-gray-100 bg-white rounded-xl p-5 flex flex-col justify-between h-full max-w-md xl:p-0 ${!isAvailable ? 'opacity-60 grayscale bg-red-500' : ''}`} >
@@ -21,7 +22,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         
           <Image
             fill
-            src={`/products/${product.image}.jpg`}
+            src={imagePath}
             alt={`Imagen de ${product.name}`}
             className="object-cover object-center transition-transform duration-300 hover:scale-105"
             priority

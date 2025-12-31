@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { OrderWithProducts } from "@/src/types";
-import { COLORS, formatCurrency } from "@/src/utils";
+import { COLORS, formatCurrency, getImagePath } from "@/src/utils";
 import { Bike, Store, Trash2, AlertTriangle } from "lucide-react";
 import Image from "next/image";
 import { markOrderCompleted } from "@/actions/mark-order-actions";
@@ -115,26 +115,29 @@ export default function OrderCard({ order }: OrderCardProps) {
 
         {/* Productos */}
         <dl className="mt-6">
-          {order.orderProducts.map((product) => (
-            <div
-              key={product.productId}
-              className="flex items-center justify-between gap-3 border-t border-gray-200 py-2"
-            >
-              <div className="flex gap-2 flex-1">
-                <dt className="flex items-center text-sm text-black">
-                  <span className="font-bold">(x{product.quantity})</span>
-                </dt>
-                <dd className="text-gray-900">{product.product.name}</dd>
+          {order.orderProducts.map((product) => {
+            const imagePath = getImagePath(product.product.image);
+            return (
+              <div
+                key={product.productId}
+                className="flex items-center justify-between gap-3 border-t border-gray-200 py-2"
+              >
+                <div className="flex gap-2 flex-1">
+                  <dt className="flex items-center text-sm text-black">
+                    <span className="font-bold">(x{product.quantity})</span>
+                  </dt>
+                  <dd className="text-gray-900">{product.product.name}</dd>
+                </div>
+                <Image
+                  src={imagePath}
+                  alt={product.product.name}
+                  width={60}
+                  height={60}
+                  className="rounded-lg object-cover object-center w-[60px] h-[60px]"
+                />
               </div>
-              <Image
-                src={`/products/${product.product.image}.jpg`}
-                alt={product.product.name}
-                width={60}
-                height={60}
-                className="rounded-lg object-cover object-center w-[60px] h-[60px]"
-              />
-            </div>
-          ))}
+            );
+          })}
 
           {order.note && (
             <p className="text-md text-gray-900 border-t border-gray-200 py-3">

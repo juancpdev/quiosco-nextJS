@@ -2,7 +2,7 @@
 
 import { toggleProductAvailability } from "@/actions/product-availability-actions";
 import { productWithCategory } from "@/app/admin/products/page";
-import { formatCurrency } from "@/src/utils";
+import { formatCurrency, getImagePath } from "@/src/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -114,8 +114,13 @@ export default function ProductTable({ products }: ProductTableType) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {products.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                {products.map((product) => {
+                const imagePath = getImagePath(product.image)
+                return (
+                  <tr
+                    key={product.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
                       {product.name}
                     </td>
@@ -123,7 +128,7 @@ export default function ProductTable({ products }: ProductTableType) {
                       <div className="w-12 h-12 relative">
                         <Image
                           className="rounded-xl object-cover"
-                          src={`/products/${product.image}.jpg`}
+                          src={imagePath}
                           fill
                           alt={`Imagen de ${product.name}`}
                         />
@@ -143,8 +148,14 @@ export default function ProductTable({ products }: ProductTableType) {
                           productId={product.id}
                           initialAvailable={product.available ?? true}
                         />
-                        <span className={`text-xs font-medium ${product.available ? 'text-green-600' : 'text-gray-500'}`}>
-                          {product.available ? 'Sí' : 'No'}
+                        <span
+                          className={`text-xs font-medium ${
+                            product.available
+                              ? "text-green-600"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {product.available ? "Sí" : "No"}
                         </span>
                       </div>
                     </td>
@@ -157,7 +168,7 @@ export default function ProductTable({ products }: ProductTableType) {
                       </Link>
                     </td>
                   </tr>
-                ))}
+                );})}
               </tbody>
             </table>
           </div>

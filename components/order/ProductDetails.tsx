@@ -2,7 +2,7 @@
 
 import { useStore } from "@/src/store";
 import { OrderItem } from "@/src/types";
-import { formatCurrency } from "@/src/utils";
+import { formatCurrency, getImagePath } from "@/src/utils";
 import { MinusIcon, PlusIcon, XMarkIcon } from "@heroicons/react/16/solid";
 import Image from "next/image";
 import { useMemo } from "react";
@@ -20,6 +20,7 @@ export default function ProductDetails({ item }: ProductDetailsProp) {
   const disabledButtonDecrease = useMemo(() => item.quantity === MIN_ITEM, [item]);
   const disabledButtonIncrease = useMemo(() => item.quantity === MAX_ITEM, [item]);
 
+  const imagePath = getImagePath(item.image)
   return (
     <motion.div
       layout
@@ -40,7 +41,7 @@ export default function ProductDetails({ item }: ProductDetailsProp) {
       <div>
         <div className="flex items-center gap-3">
           <Image
-            src={`/products/${item.image}.jpg`}
+            src={imagePath}
             alt={item.name}
             width={75}
             height={75}

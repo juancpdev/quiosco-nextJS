@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { TableWithOrders } from "@/src/types";
-import { formatCurrency } from "@/src/utils";
+import { formatCurrency, getImagePath } from "@/src/utils";
 import { X, Store, Phone, User, Clock, DollarSign, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { closeTable } from "@/actions/table-actions";
@@ -112,20 +112,38 @@ export default function TableSummaryModal({ table, onClose }: TableSummaryModalP
 
                   {/* Productos */}
                   <div className="space-y-2">
-                    {order.orderProducts.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between gap-3">
+                    {order.orderProducts.map((item) => {
+                    const imagePath = getImagePath(item.product.image);
+                    return (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between gap-3"
+                      >
                         <div className="flex items-center gap-3 flex-1">
                           <div className="relative w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden">
-                            <Image src={`/products/${item.product.image}.jpg`} alt={item.product.name} fill sizes="48px" className="object-cover" />
+                            <Image
+                              src={imagePath}
+                              alt={item.product.name}
+                              fill
+                              sizes="48px"
+                              className="object-cover"
+                            />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm truncate">{item.product.name}</p>
-                            <p className="text-xs text-gray-500">{formatCurrency(item.product.price)} x {item.quantity}</p>
+                            <p className="font-medium text-sm truncate">
+                              {item.product.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {formatCurrency(item.product.price)} x{" "}
+                              {item.quantity}
+                            </p>
                           </div>
                         </div>
-                        <p className="font-semibold text-sm whitespace-nowrap">{formatCurrency(item.product.price * item.quantity)}</p>
+                        <p className="font-semibold text-sm whitespace-nowrap">
+                          {formatCurrency(item.product.price * item.quantity)}
+                        </p>
                       </div>
-                    ))}
+                    );})}
                   </div>
                 </div>
               );

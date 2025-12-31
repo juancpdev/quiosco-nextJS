@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useRouter } from "next/navigation";
+import Logo from "@/components/ui/Logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -34,8 +34,8 @@ export default function LoginPage() {
   };
   
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4" style={{
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #ffa726 100%)',
+    <div className="min-h-screen relative flex flex-col items-center justify-center p-4" style={{
+      background: 'linear-gradient(135deg, #ff9a56 0%, #ff6b35 25%, #ffa726 50%, #ffb74d 75%, #ffd54f 100%)',
       backgroundSize: '400% 400%',
       animation: 'gradientShift 15s ease infinite'
     }}>
@@ -44,9 +44,13 @@ export default function LoginPage() {
       <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full opacity-10 blur-3xl animate-pulse"></div>
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full opacity-10 blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
       
+      {/* Logo arriba */}
+      <div className="absolute top-8 z-20">
+        <Logo />
+      </div>
 
       {/* Contenedor del formulario */}
-      <div className="relative z-10 w-full max-w-md ">
+      <div className="relative z-10 w-full max-w-md">
         {/* Card con efecto glassmorphism */}
         <div className="rounded-3xl shadow-2xl p-8 md:p-10" style={{
           background: 'rgba(100, 100, 100, 0.5)',
@@ -134,14 +138,14 @@ export default function LoginPage() {
             <button
               onClick={handleLogin}
               disabled={isLoading}
-              className="cursor-pointer w-full bg-white text-purple-600 font-semibold py-3 rounded-xl hover:opacity-90 focus:outline-none transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="cursor-pointer w-full bg-white text-orange-600 font-semibold py-3 rounded-xl hover:opacity-90 focus:outline-none transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 boxShadow: '0 4px 15px 0 rgba(255, 255, 255, 0.3)'
               }}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                  <div className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin mr-2"></div>
                   Ingresando...
                 </div>
               ) : (
