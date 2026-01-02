@@ -1,11 +1,12 @@
 'use client'
 
+import { getImagePath } from '@/src/utils'
 import { ImagePlus } from 'lucide-react'
 import { CldUploadWidget } from 'next-cloudinary'
 import Image from 'next/image'
 import { useState } from 'react'
 
-export default function ImageUpload() {
+export default function ImageUpload({image} : {image: string | undefined}) {
     const [imageUrl, setImageUrl] = useState('')
 
     return (
@@ -48,9 +49,18 @@ export default function ImageUpload() {
                                 />
                             </div>
                         )}
+
+                        {image && !imageUrl && (
+                            <Image
+                                fill
+                                style={{objectFit: 'contain'}}
+                                src={getImagePath(image)}
+                                alt='Imagen de Producto'
+                            />
+                        )}
                     </div>
                 </div>
-                <input type="hidden" name='image' value={imageUrl} />
+                <input type="hidden" name='image' value={imageUrl ? imageUrl : image} />
             </>
         )}
     </CldUploadWidget>
