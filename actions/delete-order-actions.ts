@@ -13,7 +13,7 @@ export async function deleteOrder(orderId: number) {
             orders: {
               where: {
                 status: {
-                  in: ["pending", "preparing", "ready"]
+                  in: ["pending", "completed"]
                 }
               }
             }

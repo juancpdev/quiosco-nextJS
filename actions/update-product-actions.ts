@@ -2,6 +2,7 @@
 
 import { prisma } from "@/src/lib/prisma"
 import { ProductSchema } from "@/src/schema"
+import { revalidatePath } from "next/cache"
 
 export async function updateProduct(data : unknown, id : number) {
     const result = ProductSchema.safeParse(data)
@@ -17,4 +18,6 @@ export async function updateProduct(data : unknown, id : number) {
         },
         data: result.data
     })
+    
+    revalidatePath('/admin/products');
 }

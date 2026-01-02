@@ -1,12 +1,15 @@
 'use client';
 
+import { deleteProduct } from "@/actions/delete-product-actions";
 import { toggleProductAvailability } from "@/actions/product-availability-actions";
 import { productWithCategory } from "@/app/admin/products/page";
 import { formatCurrency, getImagePath } from "@/src/utils";
+import { Edit, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 type ProductTableType = {
   products: productWithCategory;
@@ -23,27 +26,27 @@ function AvailabilityToggle({
   const [isAvailable, setIsAvailable] = useState(initialAvailable);
   const [isLoading, setIsLoading] = useState(false);
 
-const handleToggle = async () => {
-  setIsLoading(true);
-  
-  try {
-    const result = await toggleProductAvailability(productId, !isAvailable);
+  const handleToggle = async () => {
+    setIsLoading(true);
+    
+    try {
+      const result = await toggleProductAvailability(productId, !isAvailable);
 
-    if (!result.success) throw new Error(result.error);
+      if (!result.success) throw new Error(result.error);
 
-    setIsAvailable(!isAvailable);
-    toast.success(
-      !isAvailable 
-        ? '✓ Producto disponible' 
-        : 'Producto no disponible'
-    );
-  } catch (error) {
-    console.error('Error:', error);
-    toast.error('Error al actualizar disponibilidad');
-  } finally {
-    setIsLoading(false);
-  }
-};
+      setIsAvailable(!isAvailable);
+      toast.success(
+        !isAvailable 
+          ? '✓ Producto disponible' 
+          : 'Producto no disponible'
+      );
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al actualizar disponibilidad');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <button
@@ -62,6 +65,80 @@ const handleToggle = async () => {
           ${isAvailable ? 'translate-x-6' : 'translate-x-1'}
         `}
       />
+    </button>
+  );
+}
+
+// 🗑️ Delete Button Component
+function DeleteButton({ 
+  productId, 
+  productName 
+}: { 
+  productId: number; 
+  productName: string;
+}) {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    // Mostrar SweetAlert de confirmación
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: `Se eliminará el producto "${productName}". Esta acción no se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
+
+    setIsDeleting(true);
+
+    try {
+      const deleteResult = await deleteProduct(productId);
+
+      if (!deleteResult.success) {
+        throw new Error(deleteResult.error);
+      }
+
+      // Mostrar alerta de éxito
+      await Swal.fire({
+        title: '¡Eliminado!',
+        text: 'El producto ha sido eliminado correctamente.',
+        icon: 'success',
+        confirmButtonColor: '#10b981',
+        timer: 2000
+      });
+
+    } catch (error) {
+      console.error('Error:', error);
+      
+      // Mostrar alerta de error
+      await Swal.fire({
+        title: 'Error',
+        text: 'No se pudo eliminar el producto. Intenta de nuevo.',
+        icon: 'error',
+        confirmButtonColor: '#ef4444'
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleDelete}
+      disabled={isDeleting}
+      className={`
+        text-red-500 hover:text-red-800 transition-colors
+        ${isDeleting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+      `}
+      aria-label={`Eliminar ${productName}`}
+    >
+      <Trash2 className={isDeleting ? 'animate-pulse' : ''} />
     </button>
   );
 }
@@ -115,60 +192,67 @@ export default function ProductTable({ products }: ProductTableType) {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {products.map((product) => {
-                const imagePath = getImagePath(product.image)
-                return (
-                  <tr
-                    key={product.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
-                      {product.name}
-                    </td>
-                    <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
-                      <div className="w-12 h-12 relative">
-                        <Image
-                          className="rounded-xl object-cover"
-                          src={imagePath}
-                          fill
-                          alt={`Imagen de ${product.name}`}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {formatCurrency(product.price)}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
-                        {product.category.name}
-                      </span>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <AvailabilityToggle
-                          productId={product.id}
-                          initialAvailable={product.available ?? true}
-                        />
-                        <span
-                          className={`text-xs font-medium ${
-                            product.available
-                              ? "text-green-600"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          {product.available ? "Sí" : "No"}
+                  const imagePath = getImagePath(product.image);
+                  return (
+                    <tr
+                      key={product.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                        {product.name}
+                      </td>
+                      <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                        <div className="w-12 h-12 relative">
+                          <Image
+                            className="rounded-xl object-cover"
+                            src={imagePath}
+                            fill
+                            alt={`Imagen de ${product.name}`}
+                          />
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {formatCurrency(product.price)}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
+                          {product.category.name}
                         </span>
-                      </div>
-                    </td>
-                    <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                      <Link
-                        className="text-indigo-500 hover:text-indigo-800 transition-colors cursor-pointer"
-                        href={`/admin/products/${product.id}/edit`}
-                      >
-                        Editar
-                      </Link>
-                    </td>
-                  </tr>
-                );})}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <AvailabilityToggle
+                            productId={product.id}
+                            initialAvailable={product.available ?? true}
+                          />
+                          <span
+                            className={`text-xs font-medium ${
+                              product.available
+                                ? "text-green-600"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            {product.available ? "Sí" : "No"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            className="text-indigo-500 hover:text-indigo-800 transition-colors cursor-pointer"
+                            href={`/admin/products/${product.id}/edit`}
+                          >
+                            <Edit />
+                          </Link>
+                          <DeleteButton
+                            productId={product.id}
+                            productName={product.name}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
