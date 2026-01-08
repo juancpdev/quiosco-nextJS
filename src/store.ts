@@ -1,69 +1,105 @@
-import { create } from "zustand"
-import { OrderItem } from "./types"
-import { Product } from "@prisma/client"
+import { create } from "zustand";
+import { OrderItem } from "./types";
+import { Product } from "@prisma/client";
 
 interface Store {
-    order: OrderItem[]
-    addToOrder: (product: Product) => void
-    increaseQuantity: (id: Product['id']) => void
-    decreaseQuantity: (id: Product['id']) => void
-    removeItem: (id: Product['id']) => void
-    clearOrder: () => void
+  order: OrderItem[];
+  addToOrder: (product: Product) => void;
+  increaseQuantity: (id: Product["id"]) => void;
+  decreaseQuantity: (id: Product["id"]) => void;
+  removeItem: (id: Product["id"]) => void;
+  clearOrder: () => void;
+
+  // ✅ Teléfono verificado (solo vive en memoria)
+  verifiedPhone: string;
+  isPhoneVerified: boolean;
+  setVerifiedPhone: (phone: string) => void;
+  setIsPhoneVerified: (verified: boolean) => void;
+  clearVerifiedPhone: () => void;
 }
 
 export const useStore = create<Store>((set, get) => ({
-    order: [],
-    addToOrder: (product) => {
+  order: [],
 
-        const {categoryId, ...data} = product
+  addToOrder: (product) => {
+    const { categoryId, ...data } = product;
 
-        let order : OrderItem[] = []
+    let order: OrderItem[] = [];
 
-        if(get().order.find(item => item.id === data.id)) {
-            order = get().order.map(item => item.id === data.id ? {
-                ...item,
-                quantity: item.quantity < 5 ? item.quantity + 1 : item.quantity,
-                subtotal: item.quantity < 5 ? (item.quantity + 1) * item.price : item.subtotal
-            } : item)
-        } else {
-            order = [...get().order, {
-                ...data,
-                quantity: 1,
-                subtotal: 1 * product.price
-            }]
-        }
-
-        set(() => ({
-            order
-        }))
-        
-    },
-    increaseQuantity: (id) => {
-        set((state) => ({
-            order :  state.order.map(item => item.id === id ? {
-                ...item,
-                quantity: item.quantity + 1,
-                subtotal: (item.quantity + 1) * item.price
-            } : item )
-        }))
-    },
-    decreaseQuantity: (id) => {
-        set((state) => ({
-            order :  state.order.map(item => item.id === id ? {
-                ...item,
-                quantity: item.quantity > 1 ? item.quantity - 1 : item.quantity,
-                subtotal: (item.quantity - 1) * item.price
-            } : item )
-        }))
-    },
-    removeItem: (id) => {
-        set((state) => ({
-            order: state.order.filter(item => item.id !== id)
-        }))
-    },
-    clearOrder: () => {
-        set(() => ({
-            order: []
-        }))
+    if (get().order.find((item) => item.id === data.id)) {
+      order = get().order.map((item) =>
+        item.id === data.id
+          ? {
+              ...item,
+              quantity: item.quantity < 5 ? item.quantity + 1 : item.quantity,
+              subtotal:
+                item.quantity < 5
+                  ? (item.quantity + 1) * item.price
+                  : item.subtotal,
+            }
+          : item
+      );
+    } else {
+      order = [
+        ...get().order,
+        {
+          ...data,
+          quantity: 1,
+          subtotal: 1 * product.price,
+        },
+      ];
     }
-}))
+
+    set(() => ({
+      order,
+    }));
+  },
+
+  increaseQuantity: (id) => {
+    set((state) => ({
+      order: state.order.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              quantity: item.quantity + 1,
+              subtotal: (item.quantity + 1) * item.price,
+            }
+          : item
+      ),
+    }));
+  },
+
+  decreaseQuantity: (id) => {
+    set((state) => ({
+      order: state.order.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              quantity: item.quantity > 1 ? item.quantity - 1 : item.quantity,
+              subtotal: (item.quantity - 1) * item.price,
+            }
+          : item
+      ),
+    }));
+  },
+
+  removeItem: (id) => {
+    set((state) => ({
+      order: state.order.filter((item) => item.id !== id),
+    }));
+  },
+
+  clearOrder: () => {
+    set(() => ({
+      order: [],
+    }));
+  },
+
+  // ✅ Phone state
+  verifiedPhone: "",
+  isPhoneVerified: false,
+  setVerifiedPhone: (phone) => set(() => ({ verifiedPhone: phone })),
+  setIsPhoneVerified: (verified) => set(() => ({ isPhoneVerified: verified })),
+  clearVerifiedPhone: () =>
+    set(() => ({ verifiedPhone: "", isPhoneVerified: false })),
+}));

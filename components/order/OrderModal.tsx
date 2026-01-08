@@ -46,15 +46,22 @@ export default function OrderModal({
   onCloseCart: () => void;
 }) {
   const [orderType, setOrderType] = useState<"local" | "delivery" | "">("");
-  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
-  const [phone, setPhone] = useState("");
   const [resetKey, setResetKey] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<"efectivo" | "tarjeta">("efectivo");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [formData, setFormData] = useState<OrderFormData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
   const [isAdmin, setIsAdmin] = useState(false);
+
+  const {
+  verifiedPhone: phone,
+  isPhoneVerified,
+  setVerifiedPhone: setPhone,
+  setIsPhoneVerified,
+  clearVerifiedPhone,
+  order,
+  clearOrder
+} = useStore();
 
   useEffect(() => {
     fetch("/api/verify-token")
@@ -66,8 +73,6 @@ export default function OrderModal({
         }
       });
   }, []);
-
-  const { order, clearOrder } = useStore();
 
   const total = useMemo(
     () => order.reduce((acc, item) => acc + item.price * item.quantity, 0),
@@ -124,8 +129,6 @@ export default function OrderModal({
 
     reset();
     setOrderType("");
-    setPhone("");
-    setIsPhoneVerified(false);
     setPaymentMethod("efectivo");
     setFormData(null);
     setShowPaymentModal(false);
@@ -148,8 +151,6 @@ export default function OrderModal({
   const handleClose = () => {
     reset();
     setOrderType("");
-    setPhone("");
-    setIsPhoneVerified(false);
     setPaymentMethod("efectivo");
     setFormData(null);
     setShowPaymentModal(false);
@@ -157,8 +158,7 @@ export default function OrderModal({
   };
 
   const handleClearPhone = () => {
-    setPhone("");
-    setIsPhoneVerified(false);
+    clearVerifiedPhone();
     setResetKey((prev) => prev + 1);
   };
 
@@ -196,8 +196,6 @@ const handleMainButton = async () => {
           );
           return;
         }
-        // Si el teléfono coincide, continuar
-        console.log("Teléfono coincide, agregando pedido a la mesa");
       }
     }
   }
