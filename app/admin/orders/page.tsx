@@ -27,9 +27,7 @@ export default function OrdersPage() {
     return <p>Error al cargar órdenes</p>;
   }
 
-  if (!data) return null;
-
-  return (
+  if(data) return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <Heading>Administrar Órdenes</Heading>
       <OrdersGrid orders={data} />

@@ -52,7 +52,7 @@ export default function EditProductForm({children} : {children : React.ReactNode
         }
 
         toast.success('Producto editado')
-        router.push('/admin/products')
+        router.back()
     }
 
     return (
