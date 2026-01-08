@@ -1,5 +1,5 @@
-import EditProductForm from "@/components/admin/EditProductForm";
-import ProductForm from "@/components/admin/ProductForm";
+import EditProductForm from "@/components/admin/products/EditProductForm";
+import ProductForm from "@/components/admin/products/ProductForm";
 import GoBackButton from "@/components/ui/GoBackButton";
 import Heading from "@/components/ui/Heading";
 import { prisma } from "@/src/lib/prisma"

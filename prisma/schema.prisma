@@ -28,7 +28,7 @@ model Product {
 model Table {
   id        Int      @id @default(autoincrement())
   number    Int      @unique
-  status    String   @default("available")
+  status    String   @default("available") // "occupied" | "available"
   sessionId String?
   positionX Float    @default(0) 
   positionY Float    @default(0) 

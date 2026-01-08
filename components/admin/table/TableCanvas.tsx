@@ -8,6 +8,7 @@ import { TableWithOrders } from '@/src/types'
 import TableSummaryModal from './TableSummaryModal'
 import EditTableModal from './EditTableModal'
 import CreateTableModal from './CreateTableModal'
+import { formatCurrency } from '@/src/utils'
 
 type TableCanvasProps = {
   tables: Table[]
@@ -242,7 +243,7 @@ export default function TableCanvas({ tables, occupiedTables }: TableCanvasProps
                 <span className="font-bold text-lg">{table.number}</span>
                 {isOccupied && tableInfo && (
                   <span className="text-xs mt-1 font-semibold">
-                    ${tableInfo.orders.reduce((sum, order) => sum + order.total, 0).toFixed(0)}
+                    {formatCurrency(tableInfo.orders.reduce((sum, order) => sum + order.total, 0))}
                   </span>
                 )}
               </div>

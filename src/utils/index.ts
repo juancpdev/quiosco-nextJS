@@ -14,6 +14,31 @@ export function getImagePath(imagePath: string) {
   }
 }
 
+// Formatea una fecha a HH:mm (ej: 14:32)
+export function formatTime(date: Date | string): string {
+  return new Date(date).toLocaleTimeString("es-AR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+}
+
+// Devuelve la diferencia en minutos entre dos fechas
+export function minutesBetween(
+  from: Date | string,
+  to: Date | string
+): number {
+  const diff = new Date(to).getTime() - new Date(from).getTime();
+  return Math.max(0, Math.round(diff / 60000));
+}
+
+// Devuelve cuántos minutos pasaron desde una fecha hasta ahora
+export function minutesAgo(date: Date | string): number {
+  const diff = Date.now() - new Date(date).getTime();
+  return Math.max(0, Math.round(diff / 60000));
+}
+
+
 export const COLORS = {
   primary: {
     100: '#ffedd5',  // orange-100

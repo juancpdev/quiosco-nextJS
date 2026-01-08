@@ -96,13 +96,17 @@ export async function createOrder(data: unknown, isAdmin: boolean = false) {
       } else {
         // Mesa ocupada
         if (table.orders.length > 0) {
-          // ✅ Mismo teléfono → usar misma sesión
           sessionId = table.sessionId || nanoid(10);
         } else {
-          // ❌ Diferente teléfono o admin sin teléfono → nueva sesión
           sessionId = nanoid(10);
+
+          // ✅ setear nueva sesión en la mesa
+          await prisma.table.update({
+            where: { id: table.id },
+            data: { sessionId }
+          });
         }
-      }
+      } 
 
       tableId = table.id;
     }

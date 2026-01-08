@@ -1,5 +1,5 @@
-import AddProductForm from "@/components/admin/AddProductForm";
-import ProductForm from "@/components/admin/ProductForm";
+import AddProductForm from "@/components/admin/products/AddProductForm";
+import ProductForm from "@/components/admin/products/ProductForm";
 import GoBackButton from "@/components/ui/GoBackButton";
 import Heading from "@/components/ui/Heading";
 import { Undo2 } from "lucide-react";

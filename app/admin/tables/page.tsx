@@ -1,7 +1,7 @@
-import TableCanvas from "@/components/admin/TableCanvas";
-import TableManagement from "@/components/admin/TableManagement";
 import Heading from "@/components/ui/Heading";
 import { getTablesWithOrders, getAllTables } from "@/actions/table-actions";
+import TableCanvas from "@/components/admin/table/TableCanvas";
+import { formatCurrency } from "@/src/utils";
 
 export const dynamic = 'force-dynamic'
 
@@ -12,8 +12,6 @@ export default async function TablesPage() {
   const totalRevenue = occupiedTables.reduce((sum, table) => {
     return sum + table.orders.reduce((orderSum, order) => orderSum + order.total, 0)
   }, 0)
-
-  const existingTableNumbers = allTables.map(t => t.number).sort((a, b) => a - b)
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -34,7 +32,7 @@ export default async function TablesPage() {
         <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-gray-100">
           <p className="text-gray-500 text-sm font-semibold">Total en Mesas</p>
           <p className="text-4xl font-bold text-green-600 mt-2">
-            ${totalRevenue.toFixed(2)}
+            {formatCurrency(totalRevenue)}
           </p>
         </div>
       </div>

@@ -92,7 +92,7 @@ export async function deleteTable(tableNumber: number) {
         orders: {
           where: {
             status: {
-              in: ["pending", "preparing", "ready"]
+              in: ["pending", "completed"]
             }
           }
         }
@@ -150,30 +150,29 @@ export async function checkTableAvailability(tableNumber: number) {
     where: { number: tableNumber },
     include: {
       orders: {
-        where: {
-          status: {
-            in: ["pending", "preparing", "ready"]
-          }
-        },
-        take: 1, // Solo necesitamos el primer pedido para obtener el teléfono
-        orderBy: {
-          date: 'asc'
-        }
-      }
-    }
+        where: { status: { in: ["pending", "completed"] } },
+        take: 10,
+        orderBy: { date: "asc" },
+      },
+    },
   });
-  
+
   const isAvailable = table?.status === "available";
-  const firstOrderPhone = table?.orders[0]?.phone || null;
-  
+  const sessionOrders = table?.sessionId
+    ? table.orders.filter((o) => o.sessionId === table.sessionId)
+    : [];
+
+  const firstOrderPhone = sessionOrders[0]?.phone || null;
+
   return {
     available: isAvailable,
-    phone: firstOrderPhone, // ✨ Ahora retorna el teléfono
+    phone: firstOrderPhone,
     sessionId: table?.sessionId,
     tableId: table?.id,
-    exists: !!table
+    exists: !!table,
   };
 }
+
 
 // Obtener mesas ocupadas con sus órdenes
 export async function getTablesWithOrders() {
@@ -184,9 +183,8 @@ export async function getTablesWithOrders() {
     include: {
       orders: {
         where: {
-          status: {
-            in: ["pending", "completed"]
-          }
+          status: { in: ["pending", "completed"] },
+          sessionId: { not: null }
         },
         include: {
           orderProducts: {
@@ -201,54 +199,79 @@ export async function getTablesWithOrders() {
       }
     }
   });
-
-  return tables;
+  // 👇 filtrar del lado de prisma mejor:
+  // pero acá al menos no rompe.
+  return tables.map((t) => ({
+    ...t,
+    orders: t.orders.filter((o) => o.sessionId === t.sessionId),
+  }));
 }
 
-export async function closeTable(
-  tableId: number, 
-  paymentMethod: 'efectivo' | 'tarjeta'
-) {
+export async function closeTable(tableId: number, paymentMethod: "efectivo" | "tarjeta") {
   try {
-    // 1️⃣ Traer todas las órdenes de la mesa
+    const table = await prisma.table.findUnique({
+      where: { id: tableId },
+      select: { sessionId: true, number: true }
+    });
+
+    if (!table) return { success: false, error: "Mesa no encontrada" };
+
     const orders = await prisma.order.findMany({
       where: { tableId }
     });
 
-    // 2️⃣ Verificar si hay órdenes pendientes
-    const hasPendingOrders = orders.some(order => order.status !== 'completed');
+    const hasPendingOrders = orders.some(o => o.status !== "completed");
     if (hasPendingOrders) {
-      return { 
-        success: false, 
-        error: 'No se puede cerrar la mesa, hay órdenes pendientes' 
-      };
+      return { success: false, error: "No se puede cerrar la mesa, hay órdenes pendientes" };
     }
 
-    // 3️⃣ Guardar el método de pago en las órdenes (solo para métricas)
-    await prisma.order.updateMany({
-      where: { tableId },
-      data: { paymentMethod }
-    });
+    // 🔥 importante: operar por sessionId actual
+    const currentSessionId = table.sessionId;
 
-    // 4️⃣ Liberar la mesa
-    await prisma.table.update({
-      where: { id: tableId },
-      data: {
-        status: 'available',
-        sessionId: null
-      }
-    });
+    await prisma.$transaction([
+      // Guardar pago en las órdenes de la sesión actual
+      prisma.order.updateMany({
+        where: {
+          tableId,
+          ...(currentSessionId ? { sessionId: currentSessionId } : {}),
+        },
+        data: { paymentMethod }
+      }),
 
-    // 5️⃣ Revalidar paths para refrescar UI
-    revalidatePath('/admin/tables');
-    revalidatePath('/admin/orders');
+      // ✅ Desasociar órdenes de esa sesión para que no vuelvan a aparecer
+      prisma.order.updateMany({
+        where: {
+          tableId,
+          ...(currentSessionId ? { sessionId: currentSessionId } : {}),
+        },
+        data: {
+          tableId: null,
+          table: null,
+          // opcional: mantener sessionId para historial
+          // sessionId: currentSessionId,
+        }
+      }),
+
+      // Liberar la mesa
+      prisma.table.update({
+        where: { id: tableId },
+        data: {
+          status: "available",
+          sessionId: null
+        }
+      })
+    ]);
+
+    revalidatePath("/admin/tables");
+    revalidatePath("/admin/orders");
 
     return { success: true };
   } catch (error) {
-    console.error('Error closing table:', error);
-    return { success: false, error: 'Error al cerrar la mesa' };
+    console.error("Error closing table:", error);
+    return { success: false, error: "Error al cerrar la mesa" };
   }
 }
+
 
 
 // Obtener resumen de una mesa específica
@@ -258,35 +281,30 @@ export async function getTableSummary(tableNumber: number) {
     include: {
       orders: {
         where: {
-          status: {
-            in: ["pending", "completed"]
-          }
+          status: { in: ["pending", "completed"] },
         },
-        include: {
-          orderProducts: {
-            include: {
-              product: true
-            }
-          }
-        }
-      }
-    }
+        include: { orderProducts: { include: { product: true } } },
+        orderBy: { date: "asc" },
+      },
+    },
   });
 
-  if (!table || table.orders.length === 0) {
-    return null;
-  }
+  if (!table || !table.sessionId) return null;
 
-  const totalAmount = table.orders.reduce((sum, order) => sum + order.total, 0);
+  const sessionOrders = table.orders.filter((o) => o.sessionId === table.sessionId);
+
+  if (sessionOrders.length === 0) return null;
+
+  const totalAmount = sessionOrders.reduce((sum, order) => sum + order.total, 0);
 
   return {
     tableNumber: table.number,
     tableId: table.id,
     sessionId: table.sessionId,
     status: table.status,
-    orders: table.orders,
+    orders: sessionOrders,
     totalAmount,
-    customerName: table.orders[0]?.name || "",
-    phone: table.orders[0]?.phone || "",
+    customerName: sessionOrders[0]?.name || "",
+    phone: sessionOrders[0]?.phone || "",
   };
 }
