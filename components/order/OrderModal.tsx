@@ -350,7 +350,7 @@ const handleMainButton = async () => {
                   type="submit"
                   disabled={!isValid || (!isPhoneVerified && !isAdmin) || isLoading}
                   className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg font-bold text-white transition ${
-                    !isValid || !isPhoneVerified || isLoading
+                    !isValid || (!isPhoneVerified && !isAdmin) || isLoading
                       ? "bg-gray-300 cursor-not-allowed"
                       : "bg-orange-400 hover:bg-orange-500 cursor-pointer"
                   }`}

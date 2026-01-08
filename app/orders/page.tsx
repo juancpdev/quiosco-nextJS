@@ -25,7 +25,7 @@ export default function OrdersPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-full">
+      <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-gray-900" />
       </div>
     );

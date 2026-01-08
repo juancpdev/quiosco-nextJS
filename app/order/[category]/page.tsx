@@ -7,7 +7,11 @@ async function getProducts(category: string) {
       category: {
         slug: category
       }
-    }
+    },
+    orderBy: [
+      { available: 'desc' },
+      { id: 'asc'}
+    ]
   })
   return products
 }

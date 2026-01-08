@@ -37,7 +37,7 @@ function AvailabilityToggle({
       setIsAvailable(!isAvailable);
       toast.success(
         !isAvailable 
-          ? '✓ Producto disponible' 
+          ? 'Producto disponible' 
           : 'Producto no disponible'
       );
     } catch (error) {
@@ -89,8 +89,7 @@ function DeleteButton({
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#6b7280',
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-      reverseButtons: true
+      cancelButtonText: 'Cancelar'
     });
 
     if (!result.isConfirmed) return;

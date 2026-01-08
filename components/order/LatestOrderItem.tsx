@@ -102,15 +102,6 @@ export default function LatestOrderItem({ order }: OrderCardProps) {
             </p>
           )}
 
-          {/* Total */}
-          <div className="flex items-center justify-between border-t border-gray-200 py-2">
-            <dt className="text-base font-medium text-gray-900">
-                Total:
-            </dt>
-            <dd className="text-xl font-bold text-gray-900">
-              {formatCurrency(order.total)}
-            </dd>
-          </div>
         </dl>
 
       </section>
