@@ -1,110 +1,183 @@
-"use client";
+"use client"
 
-import { OrderWithProducts } from "@/src/types";
-import { COLORS, formatCurrency, getImagePath } from "@/src/utils";
-import { Bike, Store, Trash2, AlertTriangle } from "lucide-react";
-import Image from "next/image";
+import { OrderWithProducts } from "@/src/types"
+import { formatTime } from "@/src/utils"
+import { Clock, UtensilsCrossed, MoreHorizontal } from "lucide-react"
+import Image from "next/image"
+import { useEffect, useState } from "react"
 
 type OrderCardProps = {
-  order: OrderWithProducts;
-};
+  order: OrderWithProducts
+  isNew?: boolean
+}
 
-export default function LatestOrderItem({ order }: OrderCardProps) {
+const MAX_VISIBLE_PRODUCTS = 3
 
-  const isLocal = order.deliveryType === "local";
-  const bgColor = isLocal ? COLORS.primary[100] : COLORS.secondary[100];
-  const borderColor = isLocal ? COLORS.primary[200] : COLORS.secondary[200];
+export default function LatestOrderItem({ order, isNew = false }: OrderCardProps) {
+  const [timeAgo, setTimeAgo] = useState("")
 
+  // Productos visibles y restantes
+  const visibleProducts = order.orderProducts.slice(0, MAX_VISIBLE_PRODUCTS)
+  const remainingCount = order.orderProducts.length - MAX_VISIBLE_PRODUCTS
+  const hasMoreProducts = remainingCount > 0
+
+  // Calcular tiempo transcurrido desde que se completó
+  useEffect(() => {
+    const calculateTimeAgo = () => {
+      if (!order.orderReadyAt) return "Ahora"
+      
+      const now = new Date()
+      const orderDate = new Date(order.orderReadyAt)
+      const diffInMinutes = Math.floor((now.getTime() - orderDate.getTime()) / 60000)
+      
+      if (diffInMinutes < 1) return "Ahora"
+      if (diffInMinutes === 1) return "1 min"
+      if (diffInMinutes < 60) return `${diffInMinutes} min`
+      
+      const hours = Math.floor(diffInMinutes / 60)
+      if (hours === 1) return "1 hora"
+      return `${hours} horas`
+    }
+
+    setTimeAgo(calculateTimeAgo())
+    
+    // Actualizar cada 30 segundos
+    const interval = setInterval(() => {
+      setTimeAgo(calculateTimeAgo())
+    }, 30000)
+
+    return () => clearInterval(interval)
+  }, [order.orderReadyAt])
 
   return (
     <>
-      <section
-        aria-labelledby="summary-heading"
-        className="shadow-lg rounded-2xl bg-white px-4 py-6 sm:p-6 lg:p-8 space-y-4 relative"
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes pulse-ring {
+          0% {
+            box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
+          }
+          50% {
+            box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
+          }
+          100% {
+            box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+          }
+        }
+
+        .animate-slide-in {
+          animation: slideIn 0.5s ease-out;
+        }
+
+        .animate-pulse-ring {
+          animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+      `}</style>
+
+      <div
+        className={`
+          bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300
+          ${isNew 
+            ? 'animate-slide-in ring-4 ring-orange-400 animate-pulse-ring' 
+            : 'hover:shadow-xl'
+          }
+        `}
       >
-        {/* ✅ Número de orden (izquierda arriba) */}
-        <div
-          className="absolute left-0 top-0 shadow border text-black font-bold rounded-br-lg rounded-tl-lg px-3 py-1.5 text-sm"
-          style={{ backgroundColor: bgColor, borderColor: borderColor }}
-        >
-          #{order.id}
-        </div>
+        {/* Header */}
+        <div className="bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-black/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                <p className="text-white font-bold text-lg">#{order.id}</p>
+              </div>
+              {isNew && (
+                <span className="bg-white text-orange-600 text-xs font-bold px-3 py-1 rounded-full animate-pulse">
+                  NUEVA
+                </span>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-2 text-white">
+              <Clock size={18} />
+              <span className="font-semibold">{timeAgo}</span>
+            </div>
+          </div>
 
-
-        {/* ✅ Tipo de pedido (derecha arriba) */}
-        <div
-          className="absolute right-0 top-0 border shadow rounded-bl-lg rounded-tr-lg px-3 py-1.5 flex items-center gap-2"
-          style={{ backgroundColor: bgColor, borderColor: borderColor }}
-        >
-          {isLocal ? (
-            <>
-              <p className="text-black font-bold text-sm">Local</p>
-              <Store size={18} className="text-black" strokeWidth={2} />
-            </>
-          ) : (
-            <>
-              <p className="text-black font-bold text-sm">Delivery</p>
-              <Bike size={18} className="text-black" strokeWidth={2} />
-            </>
-          )}
-        </div>
-
-        {/* Info del cliente */}
-        <div className="space-y-2 mt-5">
-          <p className="text-lg text-gray-900">
-            <strong>Cliente:</strong> {order.name}
-          </p>
-          {order.phone && (
-            <p className="text-lg text-gray-900">
-              <strong>Teléfono:</strong> {order.phone}
+          {/* Mesa */}
+          <div className="mt-3 flex items-center gap-2">
+            <UtensilsCrossed size={20} className="text-white/90" />
+            <p className="text-white font-bold text-xl">
+              Mesa {order.table || 'N/A'}
             </p>
-          )}
-          {isLocal ? (
-            <p className="text-lg text-gray-900">
-              <strong>Mesa:</strong> {order.table}
-            </p>
-          ) : (
-            <p className="text-lg text-gray-900">
-              <strong>Dirección:</strong> {order.address}
-            </p>
-          )}
+          </div>
         </div>
 
         {/* Productos */}
-        <dl className="mt-6">
-          {order.orderProducts.map((product) => {
-            const imagePath = getImagePath(product.product.image);
-            return (
+        <div className="p-6">
+          <div className="space-y-3">
+            {visibleProducts.map((item) => (
               <div
-                key={product.productId}
-                className="flex items-center justify-between gap-3 border-t border-gray-200 py-2"
+                key={item.id}
+                className="flex items-center gap-4 pb-3 border-b border-gray-100 last:border-0 last:pb-0"
               >
-                <div className="flex gap-2 flex-1">
-                  <dt className="flex items-center text-sm text-black">
-                    <span className="font-bold">(x{product.quantity})</span>
-                  </dt>
-                  <dd className="text-gray-900">{product.product.name}</dd>
+                {/* Imagen del producto */}
+                <div className="relative w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100">
+                  <Image
+                    src={`/products/${item.product.image}.jpg`}
+                    alt={item.product.name}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
-                <Image
-                  src={imagePath}
-                  alt={product.product.name}
-                  width={60}
-                  height={60}
-                  className="rounded-lg object-cover object-center w-[60px] h-[60px]"
-                />
+
+                {/* Info del producto */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 truncate">
+                    {item.product.name}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="inline-flex items-center justify-center w-6 h-6 bg-orange-100 text-orange-600 rounded-full text-xs font-bold">
+                      {item.quantity}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {item.quantity > 1 ? 'unidades' : 'unidad'}
+                    </span>
+                  </div>
+                </div>
               </div>
-            );
-          })}
+            ))}
 
-          {order.note && (
-            <p className="text-md text-gray-900 border-t border-gray-200 py-3">
-              <strong>Nota:</strong> {order.note}
+            {/* Indicador de más productos */}
+            {hasMoreProducts && (
+              <div className="flex items-center justify-center gap-2 py-3 bg-orange-50 rounded-xl border border-orange-100">
+                <MoreHorizontal size={20} className="text-orange-600" />
+                <p className="text-sm font-semibold text-orange-700">
+                  +{remainingCount} {remainingCount === 1 ? 'producto más' : 'productos más'}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer con hora exacta */}
+        {order.orderReadyAt && (
+          <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
+            <p className="text-xs text-gray-500 text-center">
+              Orden completada a las {formatTime(order.orderReadyAt)}
             </p>
-          )}
-
-        </dl>
-
-      </section>
+          </div>
+        )}
+      </div>
     </>
-  );
+  )
 }

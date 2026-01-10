@@ -71,7 +71,7 @@ export default function LoginPage() {
           </div>
 
           {/* Formulario */}
-          <div className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-6">
             {/* Campo Email */}
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -136,7 +136,7 @@ export default function LoginPage() {
 
             {/* Botón de Login */}
             <button
-              onClick={handleLogin}
+              type="submit"
               disabled={isLoading}
               className="cursor-pointer w-full bg-white text-orange-600 font-semibold py-3 rounded-xl hover:opacity-90 focus:outline-none transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
@@ -152,7 +152,7 @@ export default function LoginPage() {
                 "Ingresar"
               )}
             </button>
-          </div>
+          </form>
 
           
         </div>

@@ -245,10 +245,7 @@ export async function closeTable(tableId: number, paymentMethod: "efectivo" | "t
           ...(currentSessionId ? { sessionId: currentSessionId } : {}),
         },
         data: {
-          tableId: null,
-          table: null,
-          // opcional: mantener sessionId para historial
-          // sessionId: currentSessionId,
+          tableId: null
         }
       }),
 
