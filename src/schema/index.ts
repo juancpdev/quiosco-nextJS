@@ -20,9 +20,8 @@ export const OrderSchema = z.object({
     })
   ).min(1, 'Debe haber al menos un producto'),
   paymentInfo: z.any().optional(),
-  isAdminOrder: z.boolean().optional().default(false), // ✅ Nuevo campo para identificar pedidos del admin
+  isAdminOrder: z.boolean().optional().default(false),
 }).superRefine((data, ctx) => {
-  // 🔒 Solo validar teléfono si NO es pedido del admin
   if (!data.isAdminOrder) {
     // Para pedidos en mesa (local)
     if (data.deliveryType === 'local' && !data.phone) {
@@ -86,4 +85,9 @@ export const ProductSchema = z.object({
         .refine((value) => value > 0, { message: 'La Categoría es Obligatoria' })
         .or(z.number().min(1, {message: 'La Categoría es Obligatoria' })),
     image: z.string().min(1, {message: 'La Imagen es Obligatoria'})
+})
+
+export const CategorySchema = z.object({
+  name: z.string().min(1, { message: 'El nombre es obligatorio' }),
+  icon: z.string().min(1, { message: 'El icono es obligatorio'})
 })

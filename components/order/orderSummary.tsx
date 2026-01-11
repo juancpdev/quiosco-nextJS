@@ -1,6 +1,6 @@
 "use client";
 import { useStore } from "@/src/store";
-import ProductDetails from "./ProductDetails";
+import ProductDetails from "../products/ProductDetails";
 import { useMemo } from "react";
 import { formatCurrency } from "@/src/utils";
 import { AnimatePresence, motion } from "framer-motion";

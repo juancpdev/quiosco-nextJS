@@ -10,7 +10,8 @@ datasource db {
 model Category {
   id       Int       @id @default(autoincrement()) 
   name     String
-  slug     String
+  slug     String    @unique
+  icon     String
   products Product[]
 }
 

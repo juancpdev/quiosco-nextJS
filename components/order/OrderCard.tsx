@@ -5,10 +5,10 @@ import { OrderWithProducts } from "@/src/types";
 import { COLORS, formatCurrency, getImagePath } from "@/src/utils";
 import { Bike, Store, Trash2, AlertTriangle } from "lucide-react";
 import Image from "next/image";
-import { markOrderCompleted } from "@/actions/mark-order-actions";
+import { markOrderCompleted } from "@/actions/order/mark-order-actions";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { deleteOrder } from "@/actions/delete-order-actions";
+import { deleteOrder } from "@/actions/order/delete-order-actions";
 import OrderTimer from "./OrderTimer";
 
 type OrderCardProps = {

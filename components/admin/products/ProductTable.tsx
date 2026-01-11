@@ -1,7 +1,7 @@
 'use client';
 
-import { deleteProduct } from "@/actions/delete-product-actions";
-import { toggleProductAvailability } from "@/actions/product-availability-actions";
+import { deleteProduct } from "@/actions/product/delete-product-actions";
+import { toggleProductAvailability } from "@/actions/product/product-availability-actions";
 import { productWithCategory } from "@/app/admin/products/page";
 import { formatCurrency, getImagePath } from "@/src/utils";
 import { Edit, Trash2 } from "lucide-react";

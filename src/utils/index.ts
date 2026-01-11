@@ -57,3 +57,15 @@ export const COLORS = {
     600: '#0891b2',  // cyan-600
   }
 } as const;
+
+export function generateSlug(text: string): string {
+  return text
+    .toLowerCase()                          // Convertir a minúsculas
+    .trim()                                 // Quitar espacios al inicio/fin
+    .normalize('NFD')                       // Normalizar caracteres Unicode
+    .replace(/[\u0300-\u036f]/g, '')       // Quitar acentos (á -> a, é -> e)
+    .replace(/[^a-z0-9\s-]/g, '')          // Quitar caracteres especiales
+    .replace(/\s+/g, '-')                  // Espacios -> guiones
+    .replace(/-+/g, '-')                   // Múltiples guiones -> uno solo
+    .replace(/^-+|-+$/g, '')               // Quitar guiones al inicio/fin
+}

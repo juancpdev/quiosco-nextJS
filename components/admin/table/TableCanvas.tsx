@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Table } from '@prisma/client'
-import { updateTablePosition } from '@/actions/table-actions'
+import { updateTablePosition } from '@/actions/table/table-actions'
 import { Store, Move, X, Plus } from 'lucide-react'
 import { TableWithOrders } from '@/src/types'
 import TableSummaryModal from './TableSummaryModal'

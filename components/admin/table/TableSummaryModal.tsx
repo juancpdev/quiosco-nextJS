@@ -13,10 +13,10 @@ import {
   CheckCircle,
 } from "lucide-react";
 import Image from "next/image";
-import { closeTable } from "@/actions/table-actions";
+import { closeTable } from "@/actions/table/table-actions";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import PaymentForm from "../PaymentForm";
+import PaymentForm from "./PaymentForm";
 
 type TableSummaryModalProps = {
   table: TableWithOrders;
@@ -278,14 +278,14 @@ export default function TableSummaryModal({
             <div className="flex gap-3">
               <button
                 onClick={onClose}
-                className="flex-1 py-3 px-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-xl"
+                className="flex-1 py-3 px-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-xl cursor-pointer"
               >
                 Cancelar
               </button>
 
               <button
                 onClick={handleCloseTableClick}
-                className="flex-1 py-3 px-6 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl flex items-center justify-center gap-2"
+                className="flex-1 py-3 px-6 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer"
               >
                 <CheckCircle size={18} />
                 <span>Cerrar Mesa</span>

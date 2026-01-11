@@ -1,10 +1,10 @@
 // app/admin/products/search/page.tsx
-import ProductTable from "@/components/products/ProductTable";
+import ProductTable from "@/components/admin/products/ProductTable";
 import Heading from "@/components/ui/Heading";
 import { prisma } from "@/src/lib/prisma";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import ProductSearchForm from "@/components/products/ProductSearchForm";
+import ProductSearchForm from "@/components/admin/products/ProductSearchForm";
 
 type SearchPageProps = {
   searchParams: Promise<{

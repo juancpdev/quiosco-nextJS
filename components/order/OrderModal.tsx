@@ -6,9 +6,9 @@ import PhoneVerification from "./PhoneVerification";
 import { toast } from "react-toastify";
 import MinimalCardPayment from "./MinimalCardPayment";
 import { useStore } from "@/src/store";
-import { createOrder } from "@/actions/create-order-actions";
+import { createOrder } from "@/actions/order/create-order-actions";
 import { OrderSchema } from "@/src/schema";
-import { checkTableAvailability } from '@/actions/table-actions'
+import { checkTableAvailability } from '@/actions/table/table-actions'
 import TableSelector from "./TableSelector";
 
 // Tipo para la información de pago con tarjeta

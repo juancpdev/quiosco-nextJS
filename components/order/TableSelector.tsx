@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getAllTables } from '@/actions/table-actions'
+import { getAllTables } from '@/actions/table/table-actions'
 import { Table } from '@prisma/client'
 import { Store } from 'lucide-react'
 

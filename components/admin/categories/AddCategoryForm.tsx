@@ -1,11 +1,11 @@
 'use client'
 
-import { createProduct } from "@/actions/product/create-product-actions"
-import { ProductSchema } from "@/src/schema"
+import { createCategory } from "@/actions/category/create-category-actions"
+import { CategorySchema } from "@/src/schema"
 import { useRouter } from "next/navigation"
 import { toast } from "react-toastify"
 
-export default function AddProductForm({children} : {children : React.ReactNode}) {
+export default function AddCategoryForm({children} : {children : React.ReactNode}) {
     const router = useRouter()
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -15,12 +15,10 @@ export default function AddProductForm({children} : {children : React.ReactNode}
         
         const data = {
             name: formData.get('name'),
-            price: formData.get('price'),
-            categoryId: formData.get('categoryId'),
-            image: formData.get('image')
+            icon: formData.get('icon'),
         }
         
-        const result = ProductSchema.safeParse(data)
+        const result = CategorySchema.safeParse(data)
         
         if(!result.success) {
             result.error.issues.forEach(issue => {
@@ -35,7 +33,7 @@ export default function AddProductForm({children} : {children : React.ReactNode}
             return
         }
         
-        const response = await createProduct(result.data)
+        const response = await createCategory(result.data)
         
         if(response?.errors) {
             response.errors.forEach(issue => {
@@ -49,8 +47,8 @@ export default function AddProductForm({children} : {children : React.ReactNode}
             return
         }
 
-        toast.success('Producto creado')
-        router.push('/admin/products')
+        toast.success('Categoría creada')
+        router.push('/admin/categories')
     }
 
     return (
@@ -64,7 +62,7 @@ export default function AddProductForm({children} : {children : React.ReactNode}
                 <input 
                     className="bg-orange-500 hover:bg-orange-700 transition text-white w-full rounded-lg mt-5 p-3 uppercase font-bold cursor-pointer" 
                     type="submit" 
-                    value={'Crear Producto'} 
+                    value={'Crear Categoría'} 
                 />
             </form>
         </div>

@@ -1,5 +1,5 @@
 import Heading from "@/components/ui/Heading";
-import { getTablesWithOrders, getAllTables } from "@/actions/table-actions";
+import { getTablesWithOrders, getAllTables } from "@/actions/table/table-actions";
 import TableCanvas from "@/components/admin/table/TableCanvas";
 import { formatCurrency } from "@/src/utils";
 

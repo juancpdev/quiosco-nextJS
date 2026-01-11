@@ -1,5 +1,5 @@
 import { prisma } from "@/src/lib/prisma"
-import ImageUpload from "../../products/ImageUpload"
+import ImageUpload from "./ImageUpload"
 import { Product } from "@prisma/client"
 
 async function getCategories() {

@@ -1,6 +1,6 @@
 'use client'
 
-import { updateProduct } from "@/actions/update-product-actions"
+import { updateProduct } from "@/actions/product/update-product-actions"
 import { ProductSchema } from "@/src/schema"
 import { useParams, useRouter } from "next/navigation"
 import { toast } from "react-toastify"
