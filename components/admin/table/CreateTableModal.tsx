@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { X, Plus } from 'lucide-react'
-import { createTables } from '@/actions/table/table-actions'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
+import { createTables } from '@/actions/table/create-table-actions'
 
 type CreateTableModalProps = {
   onClose: () => void

@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { Table } from '@prisma/client';
 import { X, Edit3, Trash2, Check, AlertTriangle } from 'lucide-react';
-import { updateTableNumber, deleteTable } from '@/actions/table/table-actions';
 import { toast } from 'react-toastify';
+import { updateTableNumber } from '@/actions/table/update-table-actions';
+import { deleteTable } from '@/actions/table/delete-table-actions';
 
 type EditTableModalProps = {
   table: Table;

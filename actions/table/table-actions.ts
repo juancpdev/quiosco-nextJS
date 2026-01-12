@@ -3,147 +3,6 @@
 import { prisma } from "@/src/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-// Función auxiliar para encontrar números de mesa faltantes
-async function findMissingTableNumbers(count: number): Promise<number[]> {
-  const existingTables = await prisma.table.findMany({
-    select: { number: true },
-    orderBy: { number: 'asc' }
-  });
-
-  const existingNumbers = new Set(existingTables.map(t => t.number));
-  const missingNumbers: number[] = [];
-  
-  // Buscar huecos en la secuencia
-  let currentNumber = 1;
-  while (missingNumbers.length < count) {
-    if (!existingNumbers.has(currentNumber)) {
-      missingNumbers.push(currentNumber);
-    }
-    currentNumber++;
-  }
-
-  return missingNumbers;
-}
-
-// Crear múltiples mesas (rellenando huecos primero)
-export async function createTables(count: number) {
-  try {
-    const missingNumbers = await findMissingTableNumbers(count);
-    
-    const tablesToCreate = missingNumbers.map(number => ({
-      number,
-      status: "available",
-      positionX: 50 + (Math.random() * 300), // Posición aleatoria inicial
-      positionY: 50 + (Math.random() * 300)
-    }));
-
-    await prisma.table.createMany({
-      data: tablesToCreate,
-      skipDuplicates: true
-    });
-
-    revalidatePath("/admin/tables");
-    return { success: true };
-  } catch (error) {
-    console.error("Error creating tables:", error);
-    return { success: false };
-  }
-}
-
-export async function updateTableNumber(tableId: number, newNumber: number) {
-  try {
-    // 1️⃣ Verificar si ya existe otra mesa con ese número
-    const existingTable = await prisma.table.findUnique({
-      where: { number: newNumber },
-    });
-
-    if (existingTable) {
-      return {
-        success: false,
-        error: `Ya existe la mesa ${newNumber}`,
-      };
-    }
-
-    // 2️⃣ Actualizar número de la mesa
-    await prisma.table.update({
-      where: { id: tableId },
-      data: { number: newNumber },
-    });
-
-    // 3️⃣ Revalidar path para refrescar UI
-    revalidatePath("/admin/tables");
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating table number:", error);
-    return {
-      success: false,
-      error: "No se pudo actualizar la mesa",
-    };
-  }
-}
-
-// Eliminar una mesa
-export async function deleteTable(tableNumber: number) {
-  try {
-    const table = await prisma.table.findUnique({
-      where: { number: tableNumber },
-      include: {
-        orders: {
-          where: {
-            status: {
-              in: ["pending", "completed"]
-            }
-          }
-        }
-      }
-    });
-
-    if (table && table.orders.length > 0) {
-      return { 
-        success: false, 
-        error: "No se puede eliminar una mesa con órdenes activas" 
-      };
-    }
-
-    await prisma.table.delete({
-      where: { number: tableNumber }
-    });
-
-    revalidatePath("/admin/tables");
-    return { success: true };
-  } catch (error) {
-    console.error("Error deleting table:", error);
-    return { success: false, error: "Error al eliminar la mesa" };
-  }
-}
-
-// Actualizar posición de una mesa
-export async function updateTablePosition(tableId: number, x: number, y: number) {
-  try {
-    await prisma.table.update({
-      where: { id: tableId },
-      data: {
-        positionX: x,
-        positionY: y
-      }
-    });
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating table position:", error);
-    return { success: false };
-  }
-}
-
-// Obtener todas las mesas
-export async function getAllTables() {
-  const tables = await prisma.table.findMany({
-    orderBy: { number: 'asc' }
-  });
-  return tables;
-}
-
 // Verificar disponibilidad de mesa Y retornar teléfono si está ocupada
 export async function checkTableAvailability(tableNumber: number) {
   const table = await prisma.table.findUnique({
@@ -172,7 +31,6 @@ export async function checkTableAvailability(tableNumber: number) {
     exists: !!table,
   };
 }
-
 
 // Obtener mesas ocupadas con sus órdenes
 export async function getTablesWithOrders() {
@@ -269,7 +127,13 @@ export async function closeTable(tableId: number, paymentMethod: "efectivo" | "t
   }
 }
 
-
+// Obtener todas las mesas
+export async function getAllTables() {
+  const tables = await prisma.table.findMany({
+    orderBy: { number: 'asc' }
+  });
+  return tables;
+}
 
 // Obtener resumen de una mesa específica
 export async function getTableSummary(tableNumber: number) {

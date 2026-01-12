@@ -2,43 +2,51 @@
 import { 
   // 🍔 COMIDAS
   Pizza,
-  Hamburger,
-  Sandwich,
+  Beef,
+  Ham,
   Drumstick,
   Fish,
+  Sandwich,
   Soup,
   Salad,
   Croissant,
-  Beef,
+  EggFried,
   Popcorn,
   
   // ☕ BEBIDAS
   Coffee,
   CupSoda,
-  Wine,
   Beer,
+  Wine,
+  Martini,
   Milk,
-  GlassWater, // Mejor que Droplets
+  GlassWater,
   
-  // 🍰 POSTRES Y DULCES
+  // 🍰 POSTRES
   Cake,
-  IceCream2 as IceCream, // Helado
+  CakeSlice,
+  Dessert,
   Cookie,
+  Donut,
+  IceCreamBowl,
+  IceCreamCone,
+  Popsicle,
   Candy,
   
-  // 🍎 SALUDABLE
+  // 🍎 SALUDABLE Y FRUTAS
   Apple,
-  Citrus,
+  Banana,
   Cherry,
+  Citrus,
   Carrot,
+  Vegan,
   
   // 🍴 GENERAL
   Utensils,
   UtensilsCrossed,
   ChefHat,
   ConciergeBell,
-
-  CircleSlash, // Para "Sin icono"
+  CircleSlash,
   
   type LucideIcon
 } from "lucide-react"
@@ -50,35 +58,44 @@ export const iconMap: Record<string, LucideIcon> = {
   
   // Comidas
   Pizza,
-  Hamburger,
-  Sandwich,
+  Beef,
+  Ham,
   Drumstick,
   Fish,
+  Sandwich,
   Soup,
   Salad,
   Croissant,
-  Beef,
+  EggFried,
   Popcorn,
   
   // Bebidas
   Coffee,
   CupSoda,
-  Wine,
   Beer,
+  Wine,
+  Martini,
   Milk,
   GlassWater,
   
   // Postres
   Cake,
-  IceCream,
+  CakeSlice,
+  Dessert,
   Cookie,
+  Donut,
+  IceCreamBowl,
+  IceCreamCone,
+  Popsicle,
   Candy,
   
-  // Frutas/Saludable
+  // Saludable/Frutas
   Apple,
-  Citrus,
+  Banana,
   Cherry,
+  Citrus,
   Carrot,
+  Vegan,
   
   // General
   Utensils,
@@ -101,14 +118,15 @@ export const categoryIcons: CategoryIcon[] = [
   
   // === 🍔 COMIDAS ===
   { name: "Pizza", label: "Pizzas", group: "Comidas" },
-  { name: "Hamburger", label: "Hamburguesas", group: "Comidas" },
+  { name: "Beef", label: "Hamburguesas", group: "Comidas" },
   { name: "Sandwich", label: "Sándwiches", group: "Comidas" },
+  { name: "Ham", label: "Jamón", group: "Comidas" },
   { name: "Drumstick", label: "Pollo", group: "Comidas" },
   { name: "Fish", label: "Pescados", group: "Comidas" },
   { name: "Soup", label: "Sopas", group: "Comidas" },
   { name: "Salad", label: "Ensaladas", group: "Comidas" },
   { name: "Croissant", label: "Panadería", group: "Comidas" },
-  { name: "Beef", label: "Carnes", group: "Comidas" },
+  { name: "EggFried", label: "Desayunos", group: "Comidas" },
   { name: "Popcorn", label: "Snacks", group: "Comidas" },
   
   // === ☕ BEBIDAS ===
@@ -116,20 +134,28 @@ export const categoryIcons: CategoryIcon[] = [
   { name: "CupSoda", label: "Gaseosas", group: "Bebidas" },
   { name: "Beer", label: "Cervezas", group: "Bebidas" },
   { name: "Wine", label: "Vinos", group: "Bebidas" },
+  { name: "Martini", label: "Cócteles", group: "Bebidas" },
   { name: "Milk", label: "Licuados", group: "Bebidas" },
   { name: "GlassWater", label: "Agua", group: "Bebidas" },
   
   // === 🍰 POSTRES ===
   { name: "Cake", label: "Tortas", group: "Postres" },
-  { name: "IceCream", label: "Helados", group: "Postres" },
+  { name: "CakeSlice", label: "Porciones", group: "Postres" },
+  { name: "Dessert", label: "Postres", group: "Postres" },
+  { name: "Donut", label: "Donas", group: "Postres" },
   { name: "Cookie", label: "Galletas", group: "Postres" },
+  { name: "IceCreamBowl", label: "Helados", group: "Postres" },
+  { name: "IceCreamCone", label: "Conos", group: "Postres" },
+  { name: "Popsicle", label: "Paletas", group: "Postres" },
   { name: "Candy", label: "Dulces", group: "Postres" },
   
   // === 🍎 SALUDABLE ===
-  { name: "Apple", label: "Frutas", group: "Saludable" },
+  { name: "Apple", label: "Manzanas", group: "Saludable" },
+  { name: "Banana", label: "Bananas", group: "Saludable" },
+  { name: "Cherry", label: "Cerezas", group: "Saludable" },
   { name: "Citrus", label: "Cítricos", group: "Saludable" },
-  { name: "Cherry", label: "Berries", group: "Saludable" },
   { name: "Carrot", label: "Vegetales", group: "Saludable" },
+  { name: "Vegan", label: "Vegano", group: "Saludable" },
   
   // === 🍴 GENERAL ===
   { name: "Utensils", label: "General", group: "General" },

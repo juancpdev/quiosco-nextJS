@@ -3,36 +3,93 @@
 import { useEffect, useState } from "react";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
-import CategoryIcon from "@/components/ui/CategoryIcon";
 import { Category } from "@prisma/client";
+import CategoryIcon from "../ui/CategoryIcon";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
-export default function CategorySlider() {
+type CategorySliderProps = {
+  onCategoryClick?: () => void;
+  horizontal?: boolean; // true para móvil horizontal
+};
+
+export default function CategorySlider({ onCategoryClick, horizontal = false }: CategorySliderProps) {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/categories")
       .then((res) => res.json())
-      .then((data) => setCategories(data));
+      .then((data) => {
+        setCategories(data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error al cargar categorías:", err);
+        setIsLoading(false);
+      });
   }, []);
 
-  const [sliderRef] = useKeenSlider<HTMLDivElement>({
-      slides: { perView: "auto", spacing: 10 },
-      loop: true,
-      
-    breakpoints: {
-      "(min-width: 1280px)": { // Desktop
-        slides: { perView: 1, spacing: 0 }
-      },
+  // Keen Slider SOLO para móvil horizontal
+  const [sliderRefMobile] = useKeenSlider<HTMLDivElement>({
+    slides: {
+      perView: "auto",
+      spacing: 10,
     },
+    mode: "free-snap",
   });
 
-  return (
-    <nav ref={sliderRef} className="flex xl:flex-col keen-slider ">
-      {categories.map((cat) => (
-        <div key={cat.id} className="keen-slider__slide flex justify-center items-center xl:border-b xl:rounded-b-xl xl:border-gray-200 ">
-          <CategoryIcon category={cat} />
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full p-8">
+        <div className="text-center space-y-3">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-orange-200 border-t-orange-600 mx-auto" />
+          <p className="text-sm text-gray-500">Cargando...</p>
         </div>
-      ))}
-    </nav>
+      </div>
+    );
+  }
+
+  if (categories.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full p-8">
+        <div className="text-center space-y-2">
+          <p className="text-gray-500 font-medium">No hay categorías</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Versión horizontal para móvil (con Keen Slider)
+  if (horizontal) {
+    return (
+      <div ref={sliderRefMobile} className="keen-slider">
+        {categories.map((category) => (
+          <div
+            key={category.id}
+            className="keen-slider__slide !w-auto"
+            onClick={onCategoryClick}
+          >
+            <CategoryIcon category={category}  />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Versión vertical para desktop (sin Keen Slider, scroll nativo)
+  return (
+    <div className="relative h-full">
+      <div
+        id="categories-container"
+        className="h-full overflow-y-auto overflow-x-hidden space-y-2 pr-2 scrollbar-thin scrollbar-thumb-orange-300 scrollbar-track-transparent"
+      >
+        {categories.map((category) => (
+          <div key={category.id} onClick={onCategoryClick}>
+            <CategoryIcon category={category} />
+          </div>
+        ))}
+      </div>
+
+    </div>
   );
 }
