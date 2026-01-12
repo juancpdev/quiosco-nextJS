@@ -1,6 +1,6 @@
+import CategorySearchForm from "@/components/admin/categories/CategorySearchForm";
 import CategoryTable from "@/components/admin/categories/CategoryTable";
 import ProductNavigation from "@/components/admin/products/ProductNavigation";
-import ProductSearchForm from "@/components/admin/products/ProductSearchForm";
 import Heading from "@/components/ui/Heading";
 import { prisma } from "@/src/lib/prisma";
 import { Plus } from "lucide-react";
@@ -67,7 +67,7 @@ export default async function CategoriesPage({
           Crear Categoria
         </Link>
 
-        <ProductSearchForm />
+        <CategorySearchForm />
       </div>
 
       <CategoryTable categories={categories} />

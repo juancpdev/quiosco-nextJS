@@ -1,10 +1,8 @@
 "use client";
 
-import { Category } from "@prisma/client";
 import { Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Icons from "lucide-react";
 import { categoryWithProducts } from "@/app/admin/categories/page";

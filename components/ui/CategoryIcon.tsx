@@ -78,13 +78,6 @@ export default function CategoryIcon({ category }: CategoryIconProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       )}
-
-      {/* Badge "Activo" (opcional, solo cuando está seleccionado) */}
-      {isActive && (
-        <div className="absolute -top-2 -right-2 bg-white text-orange-600 text-xs font-bold px-2 py-1 rounded-full shadow-md">
-          ✓
-        </div>
-      )}
     </Link>
   )
 }
