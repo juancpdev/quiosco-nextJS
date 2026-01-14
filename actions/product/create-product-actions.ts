@@ -3,15 +3,47 @@
 import { prisma } from "@/src/lib/prisma";
 import { ProductSchema } from "@/src/schema";
 import { revalidatePath } from "next/cache";
+import z from "zod";
 
-export async function createProduct(data: unknown) {
-  const result = ProductSchema.safeParse(data);
-
-  if (!result.success) return { errors: result.error.issues };
-
+export async function createProduct(data: z.infer<typeof ProductSchema>) {
+  // Los datos ya vienen validados desde el formulario, no necesitamos validar de nuevo
+  // El tipo z.infer<typeof ProductSchema> ya incluye la transformación (variants es array)
+  
   try {
+    const incomingVariants = data.variants as Array<{ id?: number; name: string; price: number }>;
+    const hasVariants = !!data.hasVariants;
+
+    // ✅ si hay variantes, guardamos precio = mínimo
+    const minVariantPrice =
+      hasVariants && incomingVariants.length
+        ? Math.min(...incomingVariants.map((v) => Number(v.price)))
+        : null;
+
+    const finalPrice = hasVariants
+      ? (Number.isFinite(minVariantPrice!) ? minVariantPrice! : 0)
+      : (typeof data.price === "number" ? data.price : Number(data.price));
+
     const product = await prisma.product.create({
-      data: result.data,
+      data: {
+        name: data.name,
+        price: finalPrice,
+        categoryId: data.categoryId,
+        image: data.image,
+
+        // ✅ crear variantes si corresponde
+        ...(hasVariants && incomingVariants.length
+          ? {
+              variants: {
+                create: incomingVariants
+                  .map((v) => ({
+                    name: String(v.name).trim(),
+                    price: Number(v.price),
+                  }))
+                  .filter((v) => v.name && v.price > 0),
+              },
+            }
+          : {}),
+      },
       select: { categoryId: true },
     });
 
@@ -20,16 +52,9 @@ export async function createProduct(data: unknown) {
       select: { slug: true },
     });
 
-    // ✅ Admin
     revalidatePath("/admin/products");
-
-    // ✅ Menú general (si tenés una home de order)
     revalidatePath("/order");
-
-    // ✅ La categoría específica: /order/cafe, /order/hamburguesa, etc.
-    if (category?.slug) {
-      revalidatePath(`/order/${category.slug}`);
-    }
+    if (category?.slug) revalidatePath(`/order/${category.slug}`);
 
     return { success: true };
   } catch (error) {
