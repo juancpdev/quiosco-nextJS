@@ -33,7 +33,7 @@ export default function ProductDetails({ item }: ProductDetailsProp) {
       <div className="absolute top-0 right-0 bg-red-500 h-8 w-8 rounded-bl-xl cursor-pointer rounded-tr-xl hover:bg-red-400 transition">
         <XMarkIcon
           className="text-white p-1.5"
-          onClick={() => removeItem(item.id)}
+          onClick={() => removeItem(item.itemKey)}
         />
       </div>
 
@@ -51,6 +51,12 @@ export default function ProductDetails({ item }: ProductDetailsProp) {
           <div>
             <p className="font-medium text-gray-800 text-[15px] md:text-[16px]">
               {item.name}
+              {item.variantName ? (
+                <span className="text-gray-500 font-semibold">
+                  {" "}
+                  · {item.variantName}
+                </span>
+              ) : null}
             </p>
 
             {/* Cantidad */}
@@ -58,7 +64,7 @@ export default function ProductDetails({ item }: ProductDetailsProp) {
               <button
                 type="button"
                 className="bg-gray-200 w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-300 cursor-pointer transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-200"
-                onClick={() => decreaseQuantity(item.id)}
+                onClick={() => decreaseQuantity(item.itemKey)}
                 disabled={disabledButtonDecrease}
               >
                 <MinusIcon className="h-4 w-4" />
@@ -69,7 +75,7 @@ export default function ProductDetails({ item }: ProductDetailsProp) {
               <button
                 type="button"
                 className="bg-gray-200 w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-300 cursor-pointer transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-200"
-                onClick={() => increaseQuantity(item.id)}
+                onClick={() => increaseQuantity(item.itemKey)}
                 disabled={disabledButtonIncrease}
               >
                 <PlusIcon className="h-4 w-4" />

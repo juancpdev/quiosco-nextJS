@@ -43,7 +43,7 @@ export default function SearchLayout({
         <p className="text-gray-700">
           Mostrando <span className="font-bold">{total}</span>{" "}
           resultado{total !== 1 ? "s" : ""} para:{" "}
-          <span className="font-bold text-indigo-600">"{query}"</span>
+          <span className="font-bold text-indigo-600">&ldquo;{query}&rdquo;</span>
         </p>
       </div>
 

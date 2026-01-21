@@ -24,6 +24,19 @@ model Product {
   categoryId Int
   category   Category        @relation(fields: [categoryId], references: [id])
   orderItems OrderProducts[]
+  variants   ProductVariant[]
+}
+
+model ProductVariant {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String   // "250ml", "500ml"
+  price     Float
+  available Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([productId, name]) // no duplicar variantes
 }
 
 model Table {

@@ -11,7 +11,7 @@ import { OrderFormData, CardPaymentData } from "./OrderModal";
 interface MinimalCardPaymentProps {
   formData: OrderFormData;
   onPaymentSuccess: (paymentData?: CardPaymentData) => void;
-  onPaymentError?: (error?: any) => void;
+  onPaymentError?: (error?: unknown) => void;
   onClose: () => void;
 }
 
@@ -34,7 +34,7 @@ export default function MinimalCardPayment({
     setReady(true);
   }, []);
 
-  const handleSubmit = async (param: any) => {
+  const handleSubmit = async (param: unknown) => {
     console.log("💳 Datos enviados a Mercado Pago:", param);
     console.log("📝 Formulario del pedido:", formData);
 
@@ -43,10 +43,11 @@ export default function MinimalCardPayment({
 
     // Luego procesar el pago
     setTimeout(() => {
+      const paymentParam = param as Record<string, unknown>;
       const paymentData: CardPaymentData = {
-        paymentId: param?.payment_id || "simulated_payment_id",
-        status: param?.status || "approved",
-        ...param,
+        paymentId: (paymentParam?.payment_id as string) || "simulated_payment_id",
+        status: (paymentParam?.status as string) || "approved",
+        ...paymentParam,
       };
       
       onPaymentSuccess(paymentData);

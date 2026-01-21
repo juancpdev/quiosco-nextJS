@@ -71,21 +71,73 @@ export const SearchSchema = z.object({
 })
 
 export const ProductSchema = z.object({
-    name: z.string()
-        .trim()
-        .min(1, { message: 'El Nombre del Producto no puede ir vacio'}),
-    price: z.string()
-        .trim()
-        .transform((value) => parseFloat(value)) 
-        .refine((value) => value > 0, { message: 'Precio no válido' })
-        .or(z.number().min(1, {message: 'La Categoría es Obligatoria' })),
-    categoryId: z.string()
-        .trim()
-        .transform((value) => parseInt(value)) 
-        .refine((value) => value > 0, { message: 'La Categoría es Obligatoria' })
-        .or(z.number().min(1, {message: 'La Categoría es Obligatoria' })),
-    image: z.string().min(1, {message: 'La Imagen es Obligatoria'})
+  name: z.string()
+    .trim()
+    .min(1, { message: "El nombre del producto es obligatorio" }),
+
+  price: z
+    .union([z.string(), z.number()])
+    .transform((v) => {
+      if (v === undefined || v === "" || v === null) return 0
+      return Number(v)
+    })
+    .refine((v) => !isNaN(v) && v >= 0, { 
+      message: "Precio inválido" 
+    }),
+
+  categoryId: z
+    .union([z.string(), z.number()])
+    .transform((value) => Number(value))
+    .refine((value) => value > 0, { 
+      message: "La categoría es obligatoria" 
+    }),
+
+  image: z.string()
+    .min(1, { message: "La imagen es obligatoria" }),
+
+  hasVariants: z
+    .union([z.string(), z.boolean()])
+    .transform((v) => v === true || v === "true")
+    .default(false),
+
+  variants: z
+    .string()
+    .optional()
+    .default("[]")
+    .transform((v) => {
+      if (!v || v === "[]") return []
+      try {
+        const parsed = JSON.parse(v)
+        return Array.isArray(parsed) ? parsed : []
+      } catch {
+        return []
+      }
+    })
+}).superRefine((data, ctx) => {
+  const hasVariants = data.hasVariants
+  const variants = data.variants as any[]
+  const price = Number(data.price)
+
+  // Si tiene variantes activado, debe tener al menos 1
+  if (hasVariants && variants.length === 0) {
+    ctx.addIssue({
+      path: ["variants"],
+      code: "custom",
+      message: "Agregá al menos 1 variante o desactivá el toggle de variantes",
+    })
+  }
+
+  // Si NO tiene variantes, debe tener un precio > 0
+  if (!hasVariants && (!price || price <= 0)) {
+    ctx.addIssue({
+      path: ["price"],
+      code: "custom",
+      message: "Ingresá un precio válido",
+    })
+  }
 })
+
+
 
 export const CategorySchema = z.object({
   name: z.string().min(1, { message: 'El nombre es obligatorio' }),

@@ -1,43 +1,67 @@
 "use client";
 
-import { useStore } from "@/src/store";
-import { CheckCircleIcon, PlusCircleIcon } from "@heroicons/react/16/solid";
-import { Product } from "@prisma/client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-toastify";
+import { CheckCircleIcon, PlusCircleIcon } from "@heroicons/react/16/solid";
+import type { ProductVariant } from "@prisma/client";
+import type { ProductWithVariants } from "@/src/types";
+import { useStore } from "@/src/store";
 
 export type AddProductButtonProps = {
-  product: Product,
-  isAvailable: boolean
+  product: ProductWithVariants;
+  isAvailable: boolean;
+  selectedVariant?: ProductVariant | null;
 };
 
-export default function AddProductButton({ product, isAvailable }: AddProductButtonProps) {
-  const addToOrder = useStore((state) => state.addToOrder);
-  const { order } = useStore();
+export default function AddProductButton({
+  product,
+  isAvailable,
+  selectedVariant = null,
+}: AddProductButtonProps) {
+  const addToOrder = useStore((s) => s.addToOrder);
+  const order = useStore((s) => s.order);
+
   const [added, setAdded] = useState(false);
 
-  // Busca si el producto ya está en el order y obtiene su quantity
+  const hasVariants = (product.variants?.length ?? 0) > 0;
+
+  const itemKey = useMemo(
+    () => `${product.id}:${selectedVariant?.id ?? "base"}`,
+    [product.id, selectedVariant?.id]
+  );
+
   const currentQuantity =
-    order.find((item) => item.id === product.id)?.quantity || 0;
-  const isMax = currentQuantity >= 5; // condición para bloquear
+    order.find((item) => item.itemKey === itemKey)?.quantity ?? 0;
+
+  const isMax = currentQuantity >= 5;
 
   const handleClick = () => {
-    if (isMax || !isAvailable) return;
-    addToOrder(product);
+    if (!isAvailable || isMax) return;
+
+    if (hasVariants && !selectedVariant) {
+      toast.error("Elegí un tamaño antes de agregar");
+      return;
+    }
+
+    addToOrder(product, selectedVariant);
+
     setAdded(true);
-    setTimeout(() => setAdded(false), 1000);
+    setTimeout(() => setAdded(false), 800);
   };
 
   return (
     <button
-      className={`relative m-3 font-bold transition w-8 h-8 flex items-center justify-center
-                ${
-                  isMax || !isAvailable
-                    ? "text-gray-200 cursor-not-allowed"
-                    : "text-orange-400 hover:text-orange-300 cursor-pointer "
-                }`}
+      type="button"
       onClick={handleClick}
-      disabled={isMax}
+      disabled={!isAvailable || isMax}
+      className={`relative m-3 font-bold transition w-8 h-8 flex items-center justify-center
+        ${
+          !isAvailable || isMax
+            ? "text-gray-200 cursor-not-allowed"
+            : "text-orange-400 hover:text-orange-300 cursor-pointer"
+        }`}
+      aria-label="Agregar"
     >
       <AnimatePresence>
         {!added && (
@@ -62,9 +86,9 @@ export default function AddProductButton({ product, isAvailable }: AddProductBut
             animate={{ scale: 1.2, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 500, damping: 20 }}
-            className="absolute inset-0 flex items-center justify-center text-green-500 font-bold text-xl"
+            className="absolute inset-0 flex items-center justify-center text-green-500"
           >
-            <CheckCircleIcon />
+            <CheckCircleIcon className="w-8 h-8" />
           </motion.span>
         )}
       </AnimatePresence>

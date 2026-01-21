@@ -5,12 +5,6 @@ import { ProductSchema } from "@/src/schema";
 import { revalidatePath } from "next/cache";
 import z from "zod";
 
-type VariantPayload = {
-  id?: number;
-  name: string;
-  price: number;
-};
-
 export async function updateProduct(data: z.infer<typeof ProductSchema>, id: number) {
   // Los datos ya vienen validados desde el formulario, no necesitamos validar de nuevo
   // El tipo z.infer<typeof ProductSchema> ya incluye la transformación (variants es array)
@@ -100,14 +94,33 @@ export async function updateProduct(data: z.infer<typeof ProductSchema>, id: num
       }
     });
 
-    const category = await prisma.category.findUnique({
-      where: { id: existing.categoryId },
-      select: { slug: true },
-    });
-
+    // ✅ FIX: Obtener ambas categorías (vieja y nueva) para revalidar sus paths
+    const oldCategoryId = existing.categoryId;
+    const newCategoryId = data.categoryId;
+    
+    // Revalidar paths globales
     revalidatePath("/admin/products");
     revalidatePath("/order");
-    if (category?.slug) revalidatePath(`/order/${category.slug}`);
+    
+    // Revalidar la categoría vieja si cambió
+    if (oldCategoryId !== newCategoryId) {
+      const oldCategory = await prisma.category.findUnique({
+        where: { id: oldCategoryId },
+        select: { slug: true },
+      });
+      if (oldCategory?.slug) {
+        revalidatePath(`/order/${oldCategory.slug}`);
+      }
+    }
+    
+    // Revalidar la categoría nueva
+    const newCategory = await prisma.category.findUnique({
+      where: { id: newCategoryId },
+      select: { slug: true },
+    });
+    if (newCategory?.slug) {
+      revalidatePath(`/order/${newCategory.slug}`);
+    }
 
     return { success: true };
   } catch (error) {

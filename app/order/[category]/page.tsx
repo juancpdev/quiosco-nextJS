@@ -8,6 +8,9 @@ async function getProducts(category: string) {
         slug: category,
       },
     },
+    include: {
+      variants: true
+    },
     orderBy: [{ available: "desc" }, { id: "asc" }],
   });
 
@@ -36,10 +39,11 @@ export default async function OrderPage({
   }
 
   return (
-    <div className="grid gap-10 grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 pb-10">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </div>
+<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 pb-10 items-stretch">
+  {products.map((product) => (
+    <ProductCard key={product.id} product={product} />
+  ))}
+</div>
+
   );
 }

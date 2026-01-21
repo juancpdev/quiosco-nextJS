@@ -15,7 +15,7 @@ import TableSelector from "./TableSelector";
 export interface CardPaymentData {
   paymentId?: string;
   status?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface OrderFormData {
@@ -63,6 +63,18 @@ export default function OrderModal({
   clearOrder
 } = useStore();
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isValid },
+    getValues,
+    watch, 
+    setValue 
+  } = useForm<OrderFormData>({
+    mode: "onChange",
+  });
+
   useEffect(() => {
     fetch("/api/verify-token")
       .then((res) => res.json())
@@ -72,7 +84,7 @@ export default function OrderModal({
           setIsPhoneVerified(true); 
         }
       });
-  }, []);
+  }, [setIsPhoneVerified]);
 
   const total = useMemo(
     () => order.reduce((acc, item) => acc + item.price * item.quantity, 0),
@@ -86,12 +98,12 @@ export default function OrderModal({
       table: undefined,
       note: "",
     });
-  }, [orderType]);
+  }, [orderType, reset]);
   
   // Función de envío del pedido
   const handleOrderConfirm = async (
     formValues: OrderFormData,
-    paymentInfo?: any
+    paymentInfo?: CardPaymentData
   ) => {
     const data = {
       ...formValues,
@@ -135,18 +147,6 @@ export default function OrderModal({
     onClose();
     onCloseCart()
   };
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isValid },
-    getValues,
-    watch, 
-    setValue 
-  } = useForm<OrderFormData>({
-    mode: "onChange",
-  });
 
   const handleClose = () => {
     reset();
