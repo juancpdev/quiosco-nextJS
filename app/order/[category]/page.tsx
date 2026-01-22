@@ -39,7 +39,7 @@ export default async function OrderPage({
   }
 
   return (
-<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 pb-10 items-stretch">
+<div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-6 pb-10 items-stretch">
   {products.map((product) => (
     <ProductCard key={product.id} product={product} />
   ))}

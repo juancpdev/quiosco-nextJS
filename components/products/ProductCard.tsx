@@ -132,7 +132,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Nombre */}
         <div className="flex flex-col flex-1 min-w-0">
-          <p className="font-bold text-gray-800 xl:p-2 xl:text-center text-lg truncate">
+          <p className="font-bold text-gray-800 xl:p-2 xl:text-center text-lg ">
             {product.name}
           </p>
         </div>

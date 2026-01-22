@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef } from "react";
 import { X, Plus, Package, Edit2 } from "lucide-react";
 import type { ProductVariant } from "@prisma/client";
+import { toast } from "react-toastify";
 
 type VariantDraft = {
   id?: number;
@@ -17,7 +18,6 @@ type VariantInputProps = {
 
 export default function VariantInput({ initialVariants = [], initialPrice }: VariantInputProps) {
   const [hasVariants, setHasVariants] = useState((initialVariants?.length ?? 0) > 0);
-  // ✅ Preservar variantes al cambiar toggle - usar backup
   const [variantsBackup, setVariantsBackup] = useState<VariantDraft[]>(
     initialVariants.map((v) => ({ id: v.id, name: v.name, price: v.price }))
   );
@@ -28,11 +28,14 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
   const [newPrice, setNewPrice] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   
-  // Refs para focus automático
   const nameInputRef = useRef<HTMLInputElement>(null);
   const priceInputRef = useRef<HTMLInputElement>(null);
 
-  // Precio mínimo (para el input price del producto)
+  // Ordenar variantes por precio de menor a mayor
+  const sortedVariants = useMemo(() => {
+    return [...variants].sort((a, b) => Number(a.price) - Number(b.price));
+  }, [variants]);
+
   const minPrice = useMemo(() => {
     if (!hasVariants || variants.length === 0) return null;
     return Math.min(...variants.map((v) => Number(v.price)));
@@ -43,33 +46,32 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
     const price = parseFloat(newPrice);
 
     if (!name) {
-      alert("Ingresá un nombre para la variante");
+      toast.error("Ingresá un nombre para la variante");
       nameInputRef.current?.focus();
       return;
     }
     if (!price || price <= 0) {
-      alert("Ingresá un precio válido");
+      toast.error("Ingresá un precio válido");
       priceInputRef.current?.focus();
       return;
     }
 
     if (editingIndex !== null) {
-      // ✅ Editar variante existente
       setVariants((prev) => {
         const updated = [...prev];
         updated[editingIndex] = { ...updated[editingIndex], name, price };
         return updated;
       });
       setEditingIndex(null);
+      toast.success("Variante actualizada");
     } else {
-      // ✅ Agregar nueva variante
       setVariants((prev) => [...prev, { name, price }]);
+      toast.success("Variante agregada");
     }
     
     setNewName("");
     setNewPrice("");
     
-    // ✅ Actualizar backup después de agregar/editar
     if (editingIndex !== null) {
       setVariantsBackup((prev) => {
         const updated = [...prev];
@@ -80,28 +82,32 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
       setVariantsBackup((prev) => [...prev, { name, price }]);
     }
     
-    // ✅ Focus automático en nombre después de crear
     setTimeout(() => {
       nameInputRef.current?.focus();
     }, 0);
   };
 
   const handleRemove = (index: number) => {
-    setVariants((prev) => prev.filter((_, i) => i !== index));
-    setVariantsBackup((prev) => prev.filter((_, i) => i !== index));
+    const variantToRemove = sortedVariants[index];
+    setVariants((prev) => prev.filter((v) => 
+      !(v.name === variantToRemove.name && v.price === variantToRemove.price)
+    ));
+    setVariantsBackup((prev) => prev.filter((v) => 
+      !(v.name === variantToRemove.name && v.price === variantToRemove.price)
+    ));
     if (editingIndex === index) {
       setEditingIndex(null);
       setNewName("");
       setNewPrice("");
     }
+    toast.success("Variante eliminada");
   };
 
   const handleEdit = (index: number) => {
-    const variant = variants[index];
+    const variant = sortedVariants[index];
     setNewName(variant.name);
     setNewPrice(String(variant.price));
     setEditingIndex(index);
-    // Focus en nombre para editar
     setTimeout(() => {
       nameInputRef.current?.focus();
     }, 0);
@@ -118,12 +124,10 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
     setHasVariants(newState);
     
     if (newState) {
-      // ✅ Al activar variantes, restaurar backup si existe
       if (variantsBackup.length > 0) {
         setVariants(variantsBackup);
       }
     } else {
-      // ✅ Al desactivar, guardar en backup pero no borrar
       setVariantsBackup(variants);
       setNewName("");
       setNewPrice("");
@@ -131,11 +135,10 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
     }
   };
 
-  // ✅ IMPORTANTE: Stringify del array para el hidden input
   const variantsJson = JSON.stringify(variants);
 
   return (
-    <div className="space-y-4 p-5 bg-slate-50 rounded-xl border-2 border-slate-200">
+    <div className="space-y-4 p-5 bg-slate-50 rounded-xl border-2 border-slate-200 relative">
       {/* Header con Toggle */}
       <div className="flex items-center justify-between">
         <div className="flex-1">
@@ -148,7 +151,6 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
           </p>
         </div>
 
-        {/* Toggle Button */}
         <button
           type="button"
           onClick={handleToggle}
@@ -167,11 +169,10 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
         </button>
       </div>
 
-      {/* Hidden Inputs - SIEMPRE presentes */}
       <input type="hidden" name="hasVariants" value={hasVariants ? "true" : "false"} />
       <input type="hidden" name="variants" value={variantsJson} />
 
-      {/* Precio Simple (cuando NO tiene variantes) */}
+      {/* Precio Simple */}
       {!hasVariants && (
         <div className="space-y-2">
           <label className="text-slate-800 font-semibold" htmlFor="price">
@@ -193,10 +194,9 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
         </div>
       )}
 
-      {/* Variantes (cuando SÍ tiene variantes) */}
+      {/* Variantes */}
       {hasVariants && (
         <div className="space-y-4">
-          {/* Header con precio mínimo */}
           <div className="flex items-center justify-between">
             <label className="text-slate-800 font-semibold">
               Variantes / Tamaños
@@ -208,7 +208,6 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
             )}
           </div>
 
-          {/* Hidden input para precio base */}
           <input 
             type="hidden" 
             name="price" 
@@ -216,11 +215,11 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
           />
 
           {/* Lista de variantes */}
-          {variants.length > 0 && (
+          {sortedVariants.length > 0 && (
             <div className="space-y-2">
-              {variants.map((variant, index) => (
+              {sortedVariants.map((variant, index) => (
                 <div
-                  key={variant.id ?? index}
+                  key={variant.id ?? `${variant.name}-${variant.price}`}
                   className={`flex items-center gap-3 p-3 bg-white rounded-lg border transition-all ${
                     editingIndex === index
                       ? "border-orange-500 border-2 shadow-md"
@@ -258,13 +257,13 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
             </div>
           )}
 
-          {/* Agregar/Editar variante */}
-          <div className={`space-y-3 p-4 bg-white rounded-lg border-2 ${
+          {/* Agregar/Editar variante - Compacto en una fila */}
+          <div className={`p-4 bg-white rounded-lg border-2 ${
             editingIndex !== null 
               ? "border-orange-400 border-solid bg-orange-50/30" 
               : "border-dashed border-slate-300"
           }`}>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-semibold text-slate-700">
                 {editingIndex !== null ? "Editando variante" : "Agregar nueva variante"}
               </p>
@@ -272,20 +271,22 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="text-xs text-slate-500 hover:text-slate-700 underline"
+                  className="text-xs text-slate-500 hover:text-slate-700 underline cursor-pointer"
                 >
                   Cancelar
                 </button>
               )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            
+            {/* Inputs y botón en una sola fila */}
+            <div className="flex gap-2">
               <input
                 ref={nameInputRef}
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="Ej: 500ml, Grande, 1L..."
-                className="p-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
+                placeholder="Nombre (ej: 500ml)"
+                className="flex-1 p-2.5 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all text-sm"
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -302,7 +303,7 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
                 placeholder="Precio"
                 step="0.01"
                 min="0"
-                className="p-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
+                className="w-28 p-2.5 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all text-sm"
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -311,28 +312,28 @@ export default function VariantInput({ initialVariants = [], initialPrice }: Var
                 }}
                 tabIndex={2}
               />
+              <button
+                type="button"
+                onClick={handleAddVariant}
+                className="flex items-center justify-center gap-1.5 px-4 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors cursor-pointer shadow-sm hover:shadow-md whitespace-nowrap text-sm"
+                tabIndex={3}
+              >
+                {editingIndex !== null ? (
+                  <>
+                    <Edit2 size={16} />
+                    Guardar
+                  </>
+                ) : (
+                  <>
+                    <Plus size={18} />
+                    Agregar
+                  </>
+                )}
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={handleAddVariant}
-              className="w-full flex items-center justify-center gap-2 p-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors cursor-pointer shadow-sm hover:shadow-md"
-              tabIndex={3}
-            >
-              {editingIndex !== null ? (
-                <>
-                  <Edit2 size={18} />
-                  Guardar cambios
-                </>
-              ) : (
-                <>
-                  <Plus size={20} />
-                  Agregar variante
-                </>
-              )}
-            </button>
           </div>
 
-          {variants.length === 0 && (
+          {sortedVariants.length === 0 && (
             <div className="text-center py-8 text-slate-500">
               <Package size={48} className="mx-auto mb-3 opacity-30" />
               <p className="text-sm font-medium">

@@ -53,14 +53,15 @@ export default async function ProductForm({ product }: ProductFormProps) {
         </select>
       </div>
 
-      {/* Imagen */}
-      <ImageUpload image={product?.image} />
-
       {/* VARIANTES (incluye toggle interno, precio base, y gestión) */}
       <VariantInput 
         initialVariants={product?.variants ?? []}
         initialPrice={product?.price}
       />
+      
+      {/* Imagen */}
+      <ImageUpload image={product?.image} />
+
     </>
   )
 }

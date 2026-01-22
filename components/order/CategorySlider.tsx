@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
-import { Category } from "@prisma/client";
 import CategoryIcon from "../ui/CategoryIcon";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { categoryWithProducts } from "@/app/admin/categories/page";
 
 type CategorySliderProps = {
   onCategoryClick?: () => void;
@@ -13,7 +12,7 @@ type CategorySliderProps = {
 };
 
 export default function CategorySlider({ onCategoryClick, horizontal = false }: CategorySliderProps) {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<categoryWithProducts>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -83,11 +82,12 @@ export default function CategorySlider({ onCategoryClick, horizontal = false }: 
         id="categories-container"
         className="h-full overflow-y-auto overflow-x-hidden space-y-2 pr-2 scrollbar-thin scrollbar-thumb-orange-300 scrollbar-track-transparent"
       >
-        {categories.map((category) => (
+        {categories.map((category) => category._count.products > 0 ? (
           <div key={category.id} onClick={onCategoryClick}>
             <CategoryIcon category={category} />
           </div>
-        ))}
+          ) : null
+        )}
       </div>
 
     </div>
