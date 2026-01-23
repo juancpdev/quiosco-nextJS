@@ -23,7 +23,7 @@ export default function CategoryIcon({ category }: CategoryIconProps) {
         group relative flex items-center gap-4 w-full
         rounded-xl p-4 transition-all duration-200
         ${isActive
-          ? "bg-gradient-to-r from-orange-400 to-orange-500 text-white shadow-lg scale-[1.02]"
+          ? "bg-linear-to-r from-orange-400 to-orange-500 text-white shadow-lg scale-[1.02]"
           : "bg-white hover:bg-orange-50 text-gray-700 hover:shadow-md hover:scale-[1.01]"
         }
       `}
@@ -36,7 +36,7 @@ export default function CategoryIcon({ category }: CategoryIconProps) {
       {/* Contenedor del ícono */}
       <div
         className={`
-          flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center
+          shrink-0 w-14 h-14 rounded-xl flex items-center justify-center
           transition-all duration-200
           ${isActive
             ? "bg-white/20"

@@ -115,7 +115,7 @@ export const ProductSchema = z.object({
     })
 }).superRefine((data, ctx) => {
   const hasVariants = data.hasVariants
-  const variants = data.variants as any[]
+  const variants = data.variants as Array<{ name?: string; price?: number }>
   const price = Number(data.price)
 
   // Si tiene variantes activado, debe tener al menos 1

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { formatCurrency } from "@/src/utils";
 import { Banknote, CreditCard, CheckCircle } from "lucide-react";
 import { toast } from "react-toastify";
@@ -30,7 +30,7 @@ export default function PaymentForm({
 
   return (
     <div
-      className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80"
+      className="fixed inset-0 z-300 flex items-center justify-center bg-black/80"
       onClick={onCancel}
     >
       <div
@@ -51,7 +51,7 @@ export default function PaymentForm({
             }`}
           >
             <div
-              className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+              className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
                 selectedPayment === "efectivo" ? "bg-green-500" : "bg-gray-200"
               }`}
             >
@@ -76,7 +76,7 @@ export default function PaymentForm({
             }`}
           >
             <div
-              className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+              className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
                 selectedPayment === "tarjeta" ? "bg-blue-500" : "bg-gray-200"
               }`}
             >
@@ -141,7 +141,7 @@ export default function PaymentForm({
                 onConfirm(selectedPayment === "efectivo" ? Number(cashGiven) : undefined);
             }}
             disabled={isLoading || !selectedPayment} // ahora solo deshabilitamos por loading o no pago
-            className="flex-1 py-3 px-6 cursor-pointer bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-1 py-3 px-6 cursor-pointer bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
             {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

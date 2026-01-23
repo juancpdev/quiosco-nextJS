@@ -85,7 +85,7 @@ export default function TableSummaryModal({
     <>
       {/* Modal principal */}
       <div
-        className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70"
+        className="fixed inset-0 z-200 flex items-center justify-center bg-black/70"
         onClick={onClose}
       >
         <div
@@ -93,7 +93,7 @@ export default function TableSummaryModal({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-t-2xl flex-shrink-0">
+          <div className="bg-linear-to-r from-orange-500 to-orange-600 text-white p-6 rounded-t-2xl shrink-0">
             <button
               onClick={onClose}
               className="absolute cursor-pointer top-4 right-4 text-white hover:bg-white/20 rounded-full p-2 z-10"
@@ -119,7 +119,7 @@ export default function TableSummaryModal({
 
           {/* Cliente */}
           {firstOrder && (
-            <div className="p-6 border-b bg-gray-50 flex-shrink-0">
+            <div className="p-6 border-b bg-gray-50 shrink-0">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {firstOrder.name && (
                   <div className="flex items-center gap-3">
@@ -210,9 +210,7 @@ export default function TableSummaryModal({
                   {/* Productos */}
                   <div className="space-y-2">
                     {order.orderProducts.map((item) => {
-                      const imagePath = getImagePath(
-                        item.product.image
-                      );
+                      const imagePath = getImagePath(item.productImage);
 
                       return (
                         <div
@@ -223,7 +221,7 @@ export default function TableSummaryModal({
                             <div className="relative w-12 h-12 rounded-lg overflow-hidden">
                               <Image
                                 src={imagePath}
-                                alt={item.product.name}
+                                alt={item.productName}
                                 fill
                                 sizes="48px"
                                 className="object-cover"
@@ -232,12 +230,13 @@ export default function TableSummaryModal({
 
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-sm truncate">
-                                {item.product.name}
+                                {item.productName}
+                                {!item.product && (
+                                  <span className="text-xs text-red-500 ml-1">(descontinuado)</span>
+                                )}
                               </p>
                               <p className="text-xs text-gray-500">
-                                {formatCurrency(
-                                  item.product.price
-                                )}{" "}
+                                {formatCurrency(item.productPrice)}{" "}
                                 x {item.quantity}
                               </p>
                             </div>
@@ -245,7 +244,7 @@ export default function TableSummaryModal({
 
                           <p className="font-semibold text-sm">
                             {formatCurrency(
-                              item.product.price *
+                              item.productPrice *
                                 item.quantity
                             )}
                           </p>
@@ -285,7 +284,7 @@ export default function TableSummaryModal({
 
               <button
                 onClick={handleCloseTableClick}
-                className="flex-1 py-3 px-6 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 py-3 px-6 bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer"
               >
                 <CheckCircle size={18} />
                 <span>Cerrar Mesa</span>

@@ -65,7 +65,7 @@ export default function CategorySlider({ onCategoryClick, horizontal = false }: 
         {categories.map((category) => (
           <div
             key={category.id}
-            className="keen-slider__slide !w-auto"
+            className="keen-slider__slide w-auto!"
             onClick={onCategoryClick}
           >
             <CategoryIcon category={category}  />

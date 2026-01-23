@@ -1,40 +1,29 @@
-'use server';
+// actions/product/delete-product-actions.ts
+'use server'
 
-import { prisma } from "@/src/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { prisma } from "@/src/lib/prisma"
+import { revalidatePath } from "next/cache"
 
 export async function deleteProduct(productId: number) {
   try {
-    // Verificar si el producto existe
-    const product = await prisma.product.findUnique({
-      where: { id: productId }
-    });
-
-    if (!product) {
-      return {
-        success: false,
-        error: 'Producto no encontrado'
-      };
-    }
-
     // Eliminar el producto
+    // El onDelete: SetNull pondrá productId en null pero conservará los datos
     await prisma.product.delete({
       where: { id: productId }
     });
 
-    // Revalidar la página de productos para reflejar los cambios
     revalidatePath('/admin/products');
 
     return {
       success: true,
-      message: 'Producto eliminado correctamente'
+      message: 'Producto eliminado correctamente. El historial de ventas se mantiene.'
     };
 
   } catch (error) {
     console.error('Error al eliminar producto:', error);
     return {
       success: false,
-      error: 'Error al eliminar el producto'
+      message: 'Error al eliminar el producto'
     };
   }
 }

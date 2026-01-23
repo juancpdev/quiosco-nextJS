@@ -12,7 +12,7 @@ export default function RootLayout({ children }: Readonly<{children: React.React
                 <OrderSidebar />
 
                 <main className="p-5 flex justify-center xl:flex-1 xl:h-screen xl:overflow-y-scroll xl:mt-0 overflow-y-auto overflow-x-hidden  scrollbar-thin scrollbar-thumb-orange-300 scrollbar-track-transparent">
-                    <div className="w-full xl:[width:-webkit-fill-available]">
+                    <div className="w-full xl:w-[-webkit-fill-available]">
                         <div className="flex flex-col items-center justify-center xl:hidden">
                             <Logo/>
                         </div>

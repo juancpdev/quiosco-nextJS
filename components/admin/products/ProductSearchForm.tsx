@@ -36,7 +36,7 @@ export default function ProductSearchForm() {
         <input 
             type="submit" 
             value={'Buscar'}
-            className="cursor-pointer p-2 font-bold text-white bg-gradient-to-tr from-indigo-400 to-indigo-500 rounded shadow-sm transition duration-400 hover:bg-gradient-to-tr hover:from-indigo-500 hover:to-indigo-400"
+            className="cursor-pointer p-2 font-bold text-white bg-linear-to-tr from-indigo-400 to-indigo-500 rounded shadow-sm transition duration-400 hover:bg-linear-to-tr hover:from-indigo-500 hover:to-indigo-400"
         />
     </form>
   )

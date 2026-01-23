@@ -52,7 +52,7 @@ export default function AdminSidebar() {
               onClick={(e) => handleClick(e, item.url, item.blank)}
               className={` ${
                 isActive
-                  ? "bg-gradient-to-tl from-orange-200 to-orange-400 hover:bg-orange-400 xl:cursor-default"
+                  ? "bg-linear-to-tl from-orange-200 to-orange-400 hover:bg-orange-400 xl:cursor-default"
                   : "xl:bg-white"
               } flex items-center font-bold text-lg gap-2 xl:w-full xl:h-16 rounded-xl p-3 last-of-type:border-none hover:bg-orange-50 transition-all`}
             >

@@ -17,7 +17,7 @@ export type OrderItem = Pick<Product, "id" | "image" | "name"> & {
 
 export type OrderWithProducts = Order & {
   orderProducts: (OrderProducts & {
-    product: Product;
+    product: Product | null;
   })[];
 };
 

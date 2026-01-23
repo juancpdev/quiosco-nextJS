@@ -1,7 +1,7 @@
 "use client"
 
 import { OrderWithProducts } from "@/src/types"
-import { formatTime } from "@/src/utils"
+import { formatTime, getImagePath } from "@/src/utils"
 import { Clock, UtensilsCrossed, MoreHorizontal } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
@@ -94,7 +94,7 @@ export default function LatestOrderItem({ order, isNew = false }: OrderCardProps
         `}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-4">
+        <div className="bg-linear-to-r from-orange-500 to-orange-400 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="bg-black/20 backdrop-blur-sm px-4 py-2 rounded-full">
@@ -131,10 +131,10 @@ export default function LatestOrderItem({ order, isNew = false }: OrderCardProps
                 className="flex items-center gap-4 pb-3 border-b border-gray-100 last:border-0 last:pb-0"
               >
                 {/* Imagen del producto */}
-                <div className="relative w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100">
+                <div className="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-gray-100">
                   <Image
-                    src={`/products/${item.product.image}.jpg`}
-                    alt={item.product.name}
+                    src={getImagePath(item.productImage)}
+                    alt={item.productName}
                     fill
                     className="object-cover"
                   />
@@ -142,17 +142,35 @@ export default function LatestOrderItem({ order, isNew = false }: OrderCardProps
 
                 {/* Info del producto */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 truncate">
-                    {item.product.name}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-orange-100 text-orange-600 rounded-full text-xs font-bold">
-                      {item.quantity}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {item.quantity > 1 ? 'unidades' : 'unidad'}
-                    </span>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">
+                        {item.productName}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="inline-flex items-center justify-center w-6 h-6 bg-orange-100 text-orange-600 rounded-full text-xs font-bold">
+                          {item.quantity}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {item.quantity > 1 ? 'unidades' : 'unidad'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Precio */}
+                    <div className="text-right ml-3">
+                      <p className="text-sm font-bold text-amber-500">
+                        ${item.productPrice}
+                      </p>
+                    </div>
                   </div>
+
+                  {/* 🔥 Indicador si el producto fue eliminado */}
+                  {!item.product && (
+                    <span className="text-xs text-red-500 block mt-1">
+                      (Producto descontinuado)
+                    </span>
+                  )}
                 </div>
               </div>
             ))}

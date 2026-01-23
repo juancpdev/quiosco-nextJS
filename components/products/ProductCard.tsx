@@ -51,9 +51,9 @@ export default function ProductCard({ product }: ProductCardProps) {
       }`}
     >
       {/* Imagen + Nombre */}
-      <div className="flex gap-4 items-start xl:flex-col xl:gap-0 xl:bg-gradient-to-br xl:from-orange-100 xl:to-orange-400 xl:justify-center xl:rounded-2xl">
+      <div className="flex gap-4 items-start xl:flex-col xl:gap-0 xl:bg-linear-to-br xl:from-orange-100 xl:to-orange-400 xl:justify-center xl:rounded-2xl">
         {/* Imagen */}
-        <div className="relative flex-shrink-0 w-20 aspect-square overflow-hidden rounded-lg xl:w-full xl:aspect-[4/3] xl:rounded-2xl">
+        <div className="relative shrink-0 w-20 aspect-square overflow-hidden rounded-lg xl:w-full xl:aspect-4/3 xl:rounded-2xl">
           <Image
             fill
             src={imagePath}
@@ -73,7 +73,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           {/* Variantes Desktop - Overlay en parte inferior de la imagen */}
           {hasVariants && (
-            <div className="hidden xl:block absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent pt-8 pb-3 rounded-b-2xl">
+            <div className="hidden xl:block absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/70 to-transparent pt-8 pb-3 rounded-b-2xl">
               <div className="relative px-3 group">
                 {/* Botón Izquierdo */}
                 <button
@@ -98,7 +98,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         key={v.id}
                         type="button"
                         onClick={() => setSelectedVariant(active ? null : v)}
-                        className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all cursor-pointer whitespace-nowrap ${
+                        className={`shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all cursor-pointer whitespace-nowrap ${
                           active
                             ? "bg-orange-500 text-white border-orange-500 shadow-lg"
                             : "bg-white/95 backdrop-blur-sm text-gray-700 border-gray-300 hover:bg-orange-50"
@@ -165,7 +165,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     key={v.id}
                     type="button"
                     onClick={() => setSelectedVariant(active ? null : v)}
-                    className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-medium border transition-all cursor-pointer whitespace-nowrap ${
+                    className={`shrink-0 px-3 py-2 rounded-lg text-sm font-medium border transition-all cursor-pointer whitespace-nowrap ${
                       active
                         ? "bg-orange-500 text-white border-orange-500 shadow-sm"
                         : "bg-white text-gray-700 border-gray-200 hover:bg-orange-50 hover:border-orange-300"

@@ -23,7 +23,7 @@ export default function OrderButton({
       {!orderActive ? (
         <div className="relative">
           <ShoppingBagIcon
-            className="z-200 text-center text-lg font-bold cursor-pointer fixed bottom-2 rounded-full right-2 w-12 h-12 p-2.5 bg-gradient-to-tr from-orange-200 to-orange-300 transition duration-400"
+            className="z-200 text-center text-lg font-bold cursor-pointer fixed bottom-2 rounded-full right-2 w-12 h-12 p-2.5 bg-linear-to-tr from-orange-200 to-orange-300 transition duration-400"
             onClick={statusOrder}
           />
 
@@ -35,7 +35,7 @@ export default function OrderButton({
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
                 transition={{ duration: 0.3, type: "spring"  }}
-                className="font-medium z-500 bg-gradient-to-tr from-orange-200 to-orange-300 rounded-full fixed bottom-1 right-1 w-6 h-6 flex items-center justify-center cursor-pointer"
+                className="font-medium z-500 bg-linear-to-tr from-orange-200 to-orange-300 rounded-full fixed bottom-1 right-1 w-6 h-6 flex items-center justify-center cursor-pointer"
                 onClick={statusOrder}
               >
                 {order.length}

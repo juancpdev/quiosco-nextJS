@@ -100,7 +100,7 @@ function DeleteButton({
       const deleteResult = await deleteProduct(productId);
 
       if (!deleteResult.success) {
-        throw new Error(deleteResult.error);
+        throw new Error(deleteResult.message);
       }
 
       // Mostrar alerta de éxito

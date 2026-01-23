@@ -10,7 +10,7 @@ export default function Home() {
                 <OrderSidebar />
 
                 <main className="p-5 flex justify-center xl:flex-1 xl:h-screen xl:overflow-y-scroll xl:mt-0">
-                    <div className="xl:[width:-webkit-fill-available]">
+                        <div className="xl:w-[-webkit-fill-available]">
                         <Heading>Elegí y personalizá tu pedido</Heading>
                         <p className="text-center">Seleccioná la categoria y realiza tu pedido</p>
                     </div>

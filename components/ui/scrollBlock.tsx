@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 
-export function scrollBlock(locked: boolean) {
+export function useScrollBlock(locked: boolean) {
   useEffect(() => {
     if (!locked) return;
 

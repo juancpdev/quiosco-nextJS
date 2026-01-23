@@ -2,6 +2,13 @@
 
 import { useEffect, useState } from "react";
 
+// Extensión del tipo Window para incluir la propiedad personalizada
+declare global {
+  interface Window {
+    __setMinVariantPrice?: (min: number | null) => void;
+  }
+}
+
 export default function PriceInput({
   defaultValue,
   name = "price",
@@ -16,7 +23,7 @@ export default function PriceInput({
 
   // expone handlers vía window (simple y efectivo para tu caso)
   useEffect(() => {
-    (window as any).__setMinVariantPrice = (min: number | null) => {
+    window.__setMinVariantPrice = (min: number | null) => {
       if (min == null) {
         setDisabled(false);
         return;
@@ -26,7 +33,7 @@ export default function PriceInput({
     };
 
     return () => {
-      delete (window as any).__setMinVariantPrice;
+      delete window.__setMinVariantPrice;
     };
   }, []);
 

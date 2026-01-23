@@ -41,13 +41,12 @@ export default function PhoneVerification({
       if (recaptchaVerifier) {
         try {
           recaptchaVerifier.clear();
-        } catch (e) {}
+        } catch {}
       }
     };
   }, [resetKey, recaptchaVerifier]);
 
-  const sendCode = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const sendCode = async () => {
 
     if (!phone) {
       toast.error("Por favor ingresa un número de teléfono");
@@ -68,15 +67,18 @@ export default function PhoneVerification({
       setConfirmationResult(result);
 
       toast.success("SMS enviado, revisa tu teléfono");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
 
       let errorMessage = "Error al enviar SMS";
 
-      if (err.code === "auth/invalid-phone-number") {
-        errorMessage = "Número inválido. Formato: +376XXXXXX";
-      } else if (err.code === "auth/billing-not-enabled") {
-        errorMessage = "Usa el número de prueba configurado";
+      if (err && typeof err === 'object' && 'code' in err) {
+        const firebaseError = err as { code: string };
+        if (firebaseError.code === "auth/invalid-phone-number") {
+          errorMessage = "Número inválido. Formato: +376XXXXXX";
+        } else if (firebaseError.code === "auth/billing-not-enabled") {
+          errorMessage = "Usa el número de prueba configurado";
+        }
       }
 
       toast.error(errorMessage);
@@ -85,7 +87,7 @@ export default function PhoneVerification({
       if (recaptchaVerifier) {
         try {
           recaptchaVerifier.clear();
-        } catch (e) {}
+        } catch {}
       }
       setRecaptchaVerifier(null);
       setConfirmationResult(null);
@@ -97,9 +99,7 @@ export default function PhoneVerification({
     }
   };
 
-  const verifyCode = async (e: any) => {
-    e.preventDefault();
-
+  const verifyCode = async () => {
     if (!code) {
       toast.error("Ingresa el código");
       return;
@@ -120,11 +120,11 @@ export default function PhoneVerification({
       if (recaptchaVerifier) {
         try {
           recaptchaVerifier.clear();
-        } catch (e) {}
+        } catch {}
       }
 
       await auth.signOut();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setCode("");
       toast.error("Código incorrecto");
@@ -140,7 +140,7 @@ export default function PhoneVerification({
     if (recaptchaVerifier) {
       try {
         recaptchaVerifier.clear();
-      } catch (e) {}
+      } catch {}
     }
 
     onClearPhone();
@@ -156,13 +156,10 @@ export default function PhoneVerification({
           placeholder="Teléfono +376..."
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              // Simula clic en el botón
-              if (!isVerified && !confirmationResult && !loading) {
-                sendCode(e as any); // reutiliza la misma función
-              }
+          onKeyDown={() => {
+            // Simula clic en el botón
+            if (!isVerified && !confirmationResult && !loading) {
+              sendCode(); // reutiliza la misma función
             }
           }}
           className={`w-full rounded-lg p-2 bg-gray-100 focus:outline-none flex-2 ${
@@ -209,8 +206,7 @@ export default function PhoneVerification({
             className="w-full flex-3 mr-3 rounded-lg p-2 border-2 border-gray-100 bg-gray-100 focus:outline-none focus:border-orange-500"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                e.preventDefault();
-                verifyCode(e);
+                verifyCode();
               }
             }}
           />

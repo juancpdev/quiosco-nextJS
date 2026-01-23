@@ -34,7 +34,7 @@ export default function AdminButton() {
         px-6 py-3 w-full
         rounded-xl font-bold text-sm
         text-white
-        bg-gradient-to-r from-purple-600 to-pink-500
+        bg-linear-to-r from-purple-600 to-pink-500
         shadow-lg
         transition-all duration-300
         hover:scale-105 hover:shadow-xl

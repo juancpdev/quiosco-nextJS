@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Category {
@@ -72,10 +73,15 @@ model Order {
 }
 
 model OrderProducts {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   orderId   Int
-  order     Order   @relation(fields: [orderId], references: [id])
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int?     // 🔥 AHORA ES OPCIONAL (nullable)
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
   quantity  Int
+  
+  // 🔥 NUEVOS CAMPOS: Snapshot de los datos del producto
+  productName  String
+  productPrice Float
+  productImage String
 }

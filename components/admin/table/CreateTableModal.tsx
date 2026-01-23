@@ -36,7 +36,7 @@ export default function CreateTableModal({ onClose }: CreateTableModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60"
+      className="fixed inset-0 z-300 flex items-center justify-center bg-black/60"
       onClick={onClose}
     >
       <div
@@ -44,7 +44,7 @@ export default function CreateTableModal({ onClose }: CreateTableModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6">
+        <div className="bg-linear-to-r from-green-500 to-green-600 text-white p-6">
           <button
             onClick={onClose}
             className="absolute cursor-pointer top-4 right-4 text-white hover:bg-white/20 rounded-full p-2 transition"
@@ -116,7 +116,7 @@ export default function CreateTableModal({ onClose }: CreateTableModalProps) {
             <button
               onClick={handleCreate}
               disabled={isLoading || count < 1}
-              className="flex-1 cursor-pointer py-3 px-6 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 cursor-pointer py-3 px-6 bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>

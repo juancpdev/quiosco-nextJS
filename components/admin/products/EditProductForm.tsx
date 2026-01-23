@@ -5,6 +5,12 @@ import { ProductSchema } from "@/src/schema";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
+// Tipo para errores de validación
+type ValidationIssue = {
+  path: string[];
+  message: string;
+};
+
 export default function EditProductForm({
   children,
 }: {
@@ -62,7 +68,7 @@ export default function EditProductForm({
     const response = await updateProduct(result.data, id);
 
     if (response?.errors) {
-      response.errors.forEach((issue: any) => {
+      response.errors.forEach((issue: ValidationIssue) => {
         const toastId = issue.path.join("-");
         if (!toast.isActive(toastId)) {
           toast.error(issue.message, { toastId });

@@ -5,11 +5,11 @@ import { Menu, X } from "lucide-react"
 import Logo from "../ui/Logo"
 import AdminButton from "../ui/AdminButton"
 import CategorySlider from "./CategorySlider"
-import { scrollBlock } from "../ui/scrollBlock"
+import { useScrollBlock } from "../ui/scrollBlock"
 
 export default function OrderSidebar() {
   const [isOpen, setIsOpen] = useState(false)
-  scrollBlock(isOpen);
+  useScrollBlock(isOpen);
   return (
     <>
       {/* Botón hamburguesa (solo móvil) */}
@@ -43,7 +43,7 @@ export default function OrderSidebar() {
         `}
       >
         {/* Header del sidebar (solo móvil) */}
-        <div className="xl:hidden flex items-center justify-between p-5 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-orange-100">
+        <div className="xl:hidden flex items-center justify-between p-5 border-b border-gray-200 bg-linear-to-r from-orange-50 to-orange-100">
           <div>
             <h2 className="text-xl font-bold text-gray-800">Categorías</h2>
             <p className="text-sm text-gray-600">Seleccioná tu categoría</p>

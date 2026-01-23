@@ -4,6 +4,7 @@ import ProductDetails from "../products/ProductDetails";
 import { useMemo } from "react";
 import { formatCurrency } from "@/src/utils";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 
 type OrderSummaryProps = {
   onOpenModal: () => void;
@@ -44,7 +45,9 @@ export default function OrderSummary({ onOpenModal }: OrderSummaryProps) {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="flex flex-col items-center justify-center"
           >
-            <img
+            <Image
+              width={150}
+              height={150}
               src="/carritovacio.png"
               alt="Carrito vacío"
               className="w-40 h-40 object-contain"
@@ -60,7 +63,7 @@ export default function OrderSummary({ onOpenModal }: OrderSummaryProps) {
       {!isEmpty && (
         <button
           type="button"
-          className="cursor-pointer fixed bottom-0 left-0 w-full xl:w-82 xl:left-auto bg-gradient-to-tr from-orange-200 to-orange-300 rounded-t-xl shadow-sm py-4 z-50 transition duration-400 hover:bg-gradient-to-tr hover:from-orange-500 hover:to-orange-200"
+          className="cursor-pointer fixed bottom-0 left-0 w-full xl:w-82 xl:left-auto bg-linear-to-tr from-orange-200 to-orange-300 rounded-t-xl shadow-sm py-4 z-50 transition duration-400 hover:bg-linear-to-tr hover:from-orange-500 hover:to-orange-200"
           onClick={onOpenModal}
         >
           Confirmar pedido{" "}

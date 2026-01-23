@@ -24,7 +24,7 @@ function ConfirmDeleteModal({
   onCancel: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 animate-in fade-in duration-150">
       <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
       <div className="relative bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-150">
         <div className="flex flex-col items-center text-center gap-4">
@@ -125,7 +125,7 @@ export default function EditTableModal({ table, onClose, onUpdateSuccess }: Edit
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="relative bg-gradient-to-br from-slate-50 to-slate-100/50 px-6 pt-6 pb-4 border-b border-gray-200">
+          <div className="relative bg-linear-to-br from-slate-50 to-slate-100/50 px-6 pt-6 pb-4 border-b border-gray-200">
             <button
               onClick={onClose}
               disabled={isLoading}
@@ -135,7 +135,7 @@ export default function EditTableModal({ table, onClose, onUpdateSuccess }: Edit
             </button>
 
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-lg">#{table.number}</span>
               </div>
               <div>

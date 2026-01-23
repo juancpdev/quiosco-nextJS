@@ -103,11 +103,11 @@ export default function OrdersPage() {
     
     // Actualizar los IDs previos
     setPreviousOrderIds(currentOrderIds)
-  }, [localOrders, audioEnabled])
+  }, [localOrders, audioEnabled]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isLoading) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-screen bg-gradient-to-br from-orange-50 to-white">
+      <div className="flex flex-col justify-center items-center min-h-screen bg-linear-to-br from-orange-50 to-white">
         <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-200 border-t-orange-600" />
         <p className="mt-4 text-orange-600 font-semibold">Cargando órdenes...</p>
       </div>
@@ -134,7 +134,7 @@ export default function OrdersPage() {
         src="/sounds/notification.mp3"
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
+      <div className="min-h-screen bg-linear-to-br from-orange-50 via-white to-orange-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           
           {/* Botón Toggle de Audio (Arriba a la derecha) */}

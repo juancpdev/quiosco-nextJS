@@ -1,0 +1,12 @@
+# Reglas específicas para este proyecto Prisma
+
+## Versión de Prisma
+Este proyecto usa Prisma 6.19.2. No aplicar reglas de Prisma 7.
+
+## Configuración de base de datos
+- La URL de conexión debe estar en schema.prisma, no en prisma.config.ts
+- Usar provider "postgresql" con url = env("DATABASE_URL")
+
+## Linter
+- No mostrar errores sobre propiedades 'url' en datasource blocks
+- Las reglas de Prisma 7 sobre mover URL a config files no aplican aquí
