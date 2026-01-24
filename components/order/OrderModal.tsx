@@ -81,10 +81,15 @@ export default function OrderModal({
       .then((data) => {
         setIsAdmin(data.valid);
         if (data.valid) {
-          setIsPhoneVerified(true); 
+          setIsPhoneVerified(true);
         }
+      })
+      .catch((error) => {
+        console.error("Error verificando token de admin:", error);
+        setIsAdmin(false);
+        setIsPhoneVerified(false);
       });
-  }, [setIsPhoneVerified]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const total = useMemo(
     () => order.reduce((acc, item) => acc + item.price * item.quantity, 0),
@@ -98,7 +103,8 @@ export default function OrderModal({
       table: undefined,
       note: "",
     });
-  }, [orderType, reset]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderType]); // reset es estable en react-hook-form v7+, no necesita estar en deps
   
   // Función de envío del pedido
   const handleOrderConfirm = async (
@@ -133,6 +139,7 @@ export default function OrderModal({
       setIsLoading(false);
       return;
     }
+
 
     toast.success('Pedido confirmado')
     clearOrder()
@@ -354,7 +361,7 @@ const handleMainButton = async () => {
                   }`}
                 >
                   {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 border-2 border-orange-200 border-t-orange-600 rounded-full animate-spin"></div>
                   ) : paymentMethod === "tarjeta" ? (
                     "Ir a pagar"
                   ) : (

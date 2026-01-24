@@ -9,15 +9,13 @@ export default async function AdminLayout({
     return (
         <>
             <div className="md:flex">
-                <aside className="md:w-72 md:h-screen bg-white">
-                    <AdminSidebar />
-                </aside>
+                <AdminSidebar />
 
-                <main className="md:flex-1 md:h-screen md:overflow-y-scroll bg-gray-100 p-5">
+                <main className="md:flex-1 md:h-screen md:overflow-y-scroll bg-gray-100 p-5 pt-20 md:pt-5 md:ml-0">
                     {children}
                 </main>
             </div>
-            
+
             <ToastContainer />
         </>
     )

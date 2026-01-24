@@ -31,6 +31,7 @@ export default function TableCanvas({ tables, occupiedTables }: TableCanvasProps
   const [editTable, setEditTable] = useState<Table | null>(null)
   const [createTable, setCreateTable] = useState<true | false>(false)
   const canvasRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
   const dragStartRef = useRef<{ x: number; y: number } | null>(null)
 
@@ -40,7 +41,6 @@ export default function TableCanvas({ tables, occupiedTables }: TableCanvasProps
   }
 
   const handleUpdateSuccess = () => {
-    // Aquí podés refrescar mesas desde el server o estado
     setEditTable(null)
     setSelectedTableId(null)
   }
@@ -54,9 +54,9 @@ export default function TableCanvas({ tables, occupiedTables }: TableCanvasProps
   }, [tables])
 
   useEffect(() => {
-    const handleGlobalMouseUp = async () => {
-      if (!draggingTable) return
+    if (!draggingTable) return
 
+    const handleGlobalMouseUp = async () => {
       const position = tablePositions.get(draggingTable.id)
       if (position) {
         const tableId = draggingTable.id
@@ -73,7 +73,8 @@ export default function TableCanvas({ tables, occupiedTables }: TableCanvasProps
 
     window.addEventListener('mouseup', handleGlobalMouseUp)
     return () => window.removeEventListener('mouseup', handleGlobalMouseUp)
-  }, [draggingTable, tablePositions])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draggingTable?.id]) // Solo dependemos del ID, no del objeto completo
 
   const getTableInfo = (tableNumber: number): TableWithOrders | null => {
     return occupiedTables.find(t => t.number === tableNumber) || null
@@ -110,7 +111,7 @@ export default function TableCanvas({ tables, occupiedTables }: TableCanvasProps
     const dy = Math.abs(e.clientY - start.y)
     const DRAG_THRESHOLD = 5
 
-    if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) return // sigue siendo click
+    if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) return
 
     isDraggingRef.current = true
     e.preventDefault()
@@ -147,10 +148,10 @@ export default function TableCanvas({ tables, occupiedTables }: TableCanvasProps
   }
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       {/* Botón de modo edición */}
-      <div className="mb-4 flex justify-between items-center">
-        <div className='flex gap-5'>
+      <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div className='flex flex-wrap gap-3'>
           <button
             onClick={() => {
               setEditMode(!editMode)
@@ -168,18 +169,14 @@ export default function TableCanvas({ tables, occupiedTables }: TableCanvasProps
 
           {editMode && (
             <button
-            onClick={() => {
-              addTable()
-            }}
-            className={`px-4 py-2 cursor-pointer rounded-lg font-semibold flex items-center gap-2 transition-all
-              ${editMode 
-                ? 'bg-green-500 hover:bg-green-600 text-white' 
-                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-              }`}
-          >
-            <Plus size={20} />
-            Agregar mesa
-          </button>
+              onClick={() => {
+                addTable()
+              }}
+              className="px-4 py-2 cursor-pointer rounded-lg font-semibold flex items-center gap-2 transition-all bg-green-500 hover:bg-green-600 text-white"
+            >
+              <Plus size={20} />
+              Agregar mesa
+            </button>
           )}
         </div>
 
@@ -202,64 +199,79 @@ export default function TableCanvas({ tables, occupiedTables }: TableCanvasProps
       {/* Modal de creacion */}
       {createTable && (
         <CreateTableModal
-          onClose={() => setCreateTable(false)} // ✅ Agregar onClose
+          onClose={() => setCreateTable(false)}
         />
       )}
 
-      {/* Canvas */}
-      <div
-        ref={canvasRef}
-        className={`relative bg-gray-50 border-2 border-gray-300 rounded-xl overflow-hidden ${editMode ? 'cursor-move' : 'cursor-default'}`}
-        style={{ width: '100%', height: '600px', backgroundImage: 'radial-gradient(circle, #d1d5db 1px, transparent 1px)', backgroundSize: '20px 20px' }}
-        onMouseMove={handleMouseMove}
+      {/* Contenedor con scroll único */}
+      <div 
+        ref={containerRef}
+        className="w-full overflow-x-auto overflow-y-hidden rounded-xl border-2 border-gray-300 bg-gray-50"
+        style={{
+          WebkitOverflowScrolling: 'touch', // Smooth scrolling en iOS
+        }}
       >
-        {tables.map(table => {
-          const position = tablePositions.get(table.id) || { x: table.positionX, y: table.positionY }
-          const isOccupied = table.status === 'occupied'
-          const tableInfo = getTableInfo(table.number)
-          const isSelected = selectedTableId === table.id 
-          return (
-            <div
-              key={table.id}
-              className={`absolute transition-shadow duration-200 cursor-pointer`}
-              style={{ left: `${position.x}px`, top: `${position.y}px`, width: '80px', height: '80px' }}
-              onMouseDown={(e) => handleMouseDown(e, table)}
-              onClick={() => handleTableClick(table)}
-            >
+        {/* Canvas */}
+        <div
+          ref={canvasRef}
+          className={`relative ${editMode ? 'cursor-move' : 'cursor-default'}`}
+          style={{
+            width: '100%',
+            minWidth: '1160px', // Ancho mínimo para scroll horizontal
+            height: '600px',
+            backgroundImage: 'radial-gradient(circle, #d1d5db 1px, transparent 1px)',
+            backgroundSize: '20px 20px',
+          }}
+          onMouseMove={handleMouseMove}
+        >
+          {tables.map(table => {
+            const position = tablePositions.get(table.id) || { x: table.positionX, y: table.positionY }
+            const isOccupied = table.status === 'occupied'
+            const tableInfo = getTableInfo(table.number)
+            const isSelected = selectedTableId === table.id 
+            return (
               <div
-                className={`w-full h-full rounded-xl shadow-lg flex flex-col items-center justify-center transition-all duration-200
-                  ${editMode 
-                    ?  isSelected
-                        ? 'bg-gray-400 text-white ring-4 ring-yellow-300 scale-110'
-                        : 'bg-gray-400 text-white' 
-                    : draggingTable?.id === table.id 
-                    ? 'bg-yellow-400 text-gray-900 scale-110 shadow-2xl' 
-                    : isOccupied 
-                      ? 'bg-red-500 text-white hover:bg-red-600 hover:scale-105' 
-                      : 'bg-green-500 text-white hover:bg-green-600 hover:scale-105'
-                  }`}
+                key={table.id}
+                className="absolute transition-shadow duration-200 cursor-pointer"
+                style={{ left: `${position.x}px`, top: `${position.y}px`, width: '80px', height: '80px' }}
+                onMouseDown={(e) => handleMouseDown(e, table)}
+                onClick={() => handleTableClick(table)}
               >
-                <Store size={20} className="mb-1" />
-                <span className="font-bold text-lg">{table.number}</span>
-                {isOccupied && tableInfo && (
-                  <span className="text-xs mt-1 font-semibold">
-                    {formatCurrency(tableInfo.orders.reduce((sum, order) => sum + order.total, 0))}
-                  </span>
-                )}
+                <div
+                  className={`w-full h-full rounded-xl shadow-lg flex flex-col items-center justify-center transition-all duration-200
+                    ${editMode 
+                      ?  isSelected
+                          ? 'bg-gray-400 text-white ring-4 ring-yellow-300 scale-110'
+                          : 'bg-gray-400 text-white' 
+                      : draggingTable?.id === table.id 
+                      ? 'bg-yellow-400 text-gray-900 scale-110 shadow-2xl' 
+                      : isOccupied 
+                        ? 'bg-red-500 text-white hover:bg-red-600 hover:scale-105' 
+                        : 'bg-green-500 text-white hover:bg-green-600 hover:scale-105'
+                    }`}
+                >
+                  <Store size={20} className="mb-1" />
+                  <span className="font-bold text-lg">{table.number}</span>
+                  {isOccupied && tableInfo && (
+                    <span className="text-xs mt-1 font-semibold">
+                      {formatCurrency(tableInfo.orders.reduce((sum, order) => sum + order.total, 0))}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+
+          {tables.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center text-gray-400">
+                <Store size={48} className="mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No hay mesas creadas</p>
+                <p className="text-xs">Crea mesas en la sección de arriba</p>
               </div>
             </div>
-          )
-        })}
-
-        {tables.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-gray-400">
-              <Store size={48} className="mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No hay mesas creadas</p>
-              <p className="text-xs">Crea mesas en la sección de arriba</p>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Leyenda */}

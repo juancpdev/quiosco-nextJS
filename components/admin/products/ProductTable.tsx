@@ -179,6 +179,12 @@ export default function ProductTable({ products }: ProductTableType) {
                     scope="col"
                     className="px-3 py-3.5 text-center text-md font-bold text-gray-900"
                   >
+                    Variantes
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-3 py-3.5 text-center text-md font-bold text-gray-900"
+                  >
                     Disponible
                   </th>
                   <th
@@ -216,6 +222,15 @@ export default function ProductTable({ products }: ProductTableType) {
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
                           {product.category.name}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
+                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                          product.variants.length > 0
+                            ? 'bg-green-50 text-green-700'
+                            : 'bg-gray-50 text-gray-600'
+                        }`}>
+                          {product.variants.length}
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-center">

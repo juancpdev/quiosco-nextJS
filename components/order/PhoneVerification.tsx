@@ -37,6 +37,18 @@ export default function PhoneVerification({
 
   // ✅ Limpia cuando cambia resetKey o se desmonta
   useEffect(() => {
+    // Limpiar el verifier anterior cuando cambia resetKey
+    if (recaptchaVerifier) {
+      try {
+        recaptchaVerifier.clear();
+      } catch {}
+      setRecaptchaVerifier(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetKey]);
+
+  // Cleanup al desmontar
+  useEffect(() => {
     return () => {
       if (recaptchaVerifier) {
         try {
@@ -44,7 +56,7 @@ export default function PhoneVerification({
         } catch {}
       }
     };
-  }, [resetKey, recaptchaVerifier]);
+  }, [recaptchaVerifier]);
 
   const sendCode = async () => {
 

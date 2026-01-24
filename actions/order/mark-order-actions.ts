@@ -6,20 +6,26 @@ import { revalidatePath } from "next/cache"
 
 export async function markOrderCompleted(orderId: number) {
   try {
-    await prisma.order.update({
+    const order = await prisma.order.update({
       where: { id: orderId },
       data: {
         status: "completed",
         orderReadyAt: new Date()
+      },
+      include: {
+        orderProducts: true
       }
     })
 
+    console.log(`✅ Orden #${orderId} completada - Mesa: ${order.table}, DeliveryType: ${order.deliveryType}`);
+
     revalidatePath("/admin/orders")
     revalidatePath("/admin/tables")
+    revalidatePath("/orders")
 
     return { success: true }
   } catch (error) {
-    console.error(error)
+    console.error(`❌ Error al completar orden ${orderId}:`, error)
     return { success: false }
   }
 }

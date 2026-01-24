@@ -1,21 +1,53 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import useSWR from "swr"
 import Heading from "@/components/ui/Heading"
 import { OrderWithProducts } from "@/src/types"
 import Logo from "@/components/ui/Logo"
 import LatestOrderItem from "@/components/order/LatestOrderItem"
 import Masonry from "react-masonry-css"
-import { Volume2, VolumeX } from "lucide-react"
+import { Volume2, VolumeX, Calendar } from "lucide-react"
 
 export default function OrdersPage() {
   const url = "/orders/api"
   const fetcher = () => fetch(url).then((res) => res.json())
-  const [previousOrderIds, setPreviousOrderIds] = useState<Set<number>>(new Set())
+  const previousOrderIdsRef = useRef<Set<number>>(new Set())
   const [newOrderIds, setNewOrderIds] = useState<Set<number>>(new Set())
   const [audioEnabled, setAudioEnabled] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    // Por defecto seleccionar hoy
+    return new Date().toISOString().split('T')[0]
+  })
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Funciones para manejar fechas
+  const getDateOptions = () => {
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(today.getDate() - 1)
+
+    return [
+      {
+        label: 'Ayer',
+        value: yesterday.toISOString().split('T')[0],
+        display: yesterday.toLocaleDateString('es-ES', {
+          day: 'numeric',
+          month: 'long'
+        })
+      },
+      {
+        label: 'Hoy',
+        value: today.toISOString().split('T')[0],
+        display: today.toLocaleDateString('es-ES', {
+          day: 'numeric',
+          month: 'long'
+        })
+      }
+    ]
+  }
+
 
   const { data, error, isLoading } = useSWR<OrderWithProducts[]>(url, fetcher, {
     refreshInterval: 3000,
@@ -29,8 +61,19 @@ export default function OrdersPage() {
     640: 1,
   }
 
-  // Filtrar solo órdenes locales (mesas)
-  const localOrders = data?.filter(order => order.deliveryType === 'local') || []
+  // Filtrar solo órdenes locales (mesas) y por fecha seleccionada
+  const localOrders = useMemo(
+    () => data?.filter(order => order.deliveryType === 'local') || [],
+    [data]
+  )
+  const filteredOrders = useMemo(
+    () => localOrders.filter(order => {
+      if (!order.orderReadyAt) return false
+      const orderDate = new Date(order.orderReadyAt).toISOString().split('T')[0]
+      return orderDate === selectedDate
+    }),
+    [localOrders, selectedDate]
+  )
 
   // Toggle para habilitar/deshabilitar audio
   const toggleAudio = async () => {
@@ -58,13 +101,23 @@ export default function OrdersPage() {
 
   // Detectar nuevas órdenes y reproducir sonido
   useEffect(() => {
-    if (localOrders.length === 0) return
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current)
+      highlightTimeoutRef.current = null
+    }
 
-    const currentOrderIds = new Set(localOrders.map(order => order.id))
-    
+    if (filteredOrders.length === 0) {
+      previousOrderIdsRef.current = new Set()
+      return
+    }
+
+    // Usar IDs en lugar del array completo para evitar re-renders innecesarios
+    const currentOrderIds = new Set(filteredOrders.map(order => order.id))
+    const previousOrderIds = previousOrderIdsRef.current
+
     // Si es la primera carga, solo guardar los IDs
     if (previousOrderIds.size === 0) {
-      setPreviousOrderIds(currentOrderIds)
+      previousOrderIdsRef.current = currentOrderIds
       return
     }
 
@@ -79,9 +132,21 @@ export default function OrdersPage() {
     // Si hay órdenes nuevas
     if (newIds.size > 0) {
       console.log('🔔 Nueva(s) orden(es) detectada(s):', Array.from(newIds))
-      
-      setNewOrderIds(newIds)
-      
+
+      setNewOrderIds(prev => {
+        if (prev.size === newIds.size) {
+          let same = true
+          for (const id of newIds) {
+            if (!prev.has(id)) {
+              same = false
+              break
+            }
+          }
+          if (same) return prev
+        }
+        return newIds
+      })
+
       // Reproducir sonido si está habilitado
       if (audioEnabled && audioRef.current) {
         audioRef.current.currentTime = 0
@@ -96,14 +161,22 @@ export default function OrdersPage() {
       }
 
       // Quitar el highlight después de 8 segundos
-      setTimeout(() => {
+      highlightTimeoutRef.current = setTimeout(() => {
         setNewOrderIds(new Set())
+        highlightTimeoutRef.current = null
       }, 8000)
     }
-    
-    // Actualizar los IDs previos
-    setPreviousOrderIds(currentOrderIds)
-  }, [localOrders, audioEnabled]) // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Actualizar los IDs previos (sin re-render)
+    previousOrderIdsRef.current = currentOrderIds
+    return () => {
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current)
+        highlightTimeoutRef.current = null
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredOrders.length, audioEnabled])
 
   if (isLoading) {
     return (
@@ -162,19 +235,52 @@ export default function OrdersPage() {
           {/* Header */}
           <div className="flex flex-col justify-center items-center">
             <Heading>Órdenes Listas</Heading>
+
+            {/* Filtro de fechas */}
+            <div className="mt-6 mb-4">
+              <div className="flex items-center gap-3 bg-white rounded-xl p-2 shadow-md">
+                <Calendar size={20} className="text-orange-500 ml-2" />
+                <div className="flex gap-2">
+                  {getDateOptions().map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setSelectedDate(option.value)}
+                      className={`
+                        cursor-pointer px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200
+                        ${selectedDate === option.value
+                          ? 'bg-orange-500 text-white shadow-md transform scale-105'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }
+                      `}
+                    >
+                      <span className="block leading-tight">
+                        {option.label}
+                      </span>
+                      <span className={`
+                        block text-xs leading-tight
+                        ${selectedDate === option.value ? 'text-orange-100' : 'text-gray-500'}
+                      `}>
+                        {option.display}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             <div className="hidden 2xl:block fixed bottom-0 right-6">
               <Logo />
             </div>
           </div>
 
           {/* Grid de órdenes */}
-          {localOrders.length ? (
+          {filteredOrders.length ? (
             <Masonry
               breakpointCols={breakpointColumns}
               className="flex -ml-6 w-auto mt-4"
               columnClassName="pl-6 bg-clip-padding"
             >
-              {localOrders.map((order) => (
+              {filteredOrders.map((order) => (
                 <div key={order.id} className="mb-6">
                   <LatestOrderItem 
                     order={order}
@@ -192,7 +298,7 @@ export default function OrdersPage() {
                   </svg>
                 </div>
                 <p className="text-xl text-gray-600 font-semibold">No hay órdenes pendientes</p>
-                <p className="text-sm text-gray-400 mt-2">Las nuevas órdenes aparecerán aquí</p>
+                <p className="text-sm text-gray-400 mt-2">No hay órdenes en esta fecha</p>
               </div>
             </div>
           )}

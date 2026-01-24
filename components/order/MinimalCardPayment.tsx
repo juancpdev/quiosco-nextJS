@@ -1,7 +1,7 @@
 "use client";
 
 import { CardPayment } from "@mercadopago/sdk-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { initializeMercadoPago } from "@/src/lib/mercadoPagoInit";
 import { toast } from "react-toastify";
 import { useStore } from "@/src/store";
@@ -23,6 +23,7 @@ export default function MinimalCardPayment({
 }: MinimalCardPaymentProps) {
   const [ready, setReady] = useState(false);
   const { order } = useStore();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const total = useMemo(
     () => order.reduce((total, item) => total + item.quantity * item.price, 0),
@@ -34,6 +35,15 @@ export default function MinimalCardPayment({
     setReady(true);
   }, []);
 
+  // Cleanup del timeout al desmontar
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleSubmit = async (param: unknown) => {
     console.log("💳 Datos enviados a Mercado Pago:", param);
     console.log("📝 Formulario del pedido:", formData);
@@ -42,7 +52,7 @@ export default function MinimalCardPayment({
     onClose();
 
     // Luego procesar el pago
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       const paymentParam = param as Record<string, unknown>;
       const paymentData: CardPaymentData = {
         paymentId: (paymentParam?.payment_id as string) || "simulated_payment_id",
@@ -51,6 +61,7 @@ export default function MinimalCardPayment({
       };
       
       onPaymentSuccess(paymentData);
+      timeoutRef.current = null;
     }, 300); // Reducido a 300ms para que sea más rápido
   };
 
@@ -102,7 +113,7 @@ export default function MinimalCardPayment({
             />
           ) : (
             <div className="flex justify-center items-center p-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-orange-200 border-t-orange-600"></div>
               <p className="ml-3 text-gray-500">Cargando método de pago...</p>
             </div>
           )}

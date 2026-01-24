@@ -229,12 +229,19 @@ export default function TableSummaryModal({
                             </div>
 
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm truncate">
-                                {item.productName}
-                                {!item.product && (
-                                  <span className="text-xs text-red-500 ml-1">(descontinuado)</span>
+                              <div className="flex flex-col">
+                                <p className="font-medium text-sm truncate">
+                                  {item.productName}
+                                  {!item.product && (
+                                    <span className="text-xs text-red-500 ml-1">(descontinuado)</span>
+                                  )}
+                                </p>
+                                {item.variantName && (
+                                  <p className="text-xs text-orange-600 font-medium truncate">
+                                    Variante: {item.variantName}
+                                  </p>
                                 )}
-                              </p>
+                              </div>
                               <p className="text-xs text-gray-500">
                                 {formatCurrency(item.productPrice)}{" "}
                                 x {item.quantity}

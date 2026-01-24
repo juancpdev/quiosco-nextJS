@@ -31,6 +31,13 @@ export default function OrderCard({ order }: OrderCardProps) {
     if (result.success) {
       toast.success("Orden completada");
       router.refresh();
+      // También refrescar admin/tables si estamos en admin/orders
+      if (typeof window !== 'undefined' && window.location.pathname.includes('/admin/orders')) {
+        // Trigger refresh of admin/tables via revalidation
+        fetch('/api/admin/tables/refresh', { method: 'POST' }).catch(() => {
+          // Silenciar errores de red
+        });
+      }
     } else {
       toast.error("Error al completar la orden");
     }
@@ -127,10 +134,17 @@ export default function OrderCard({ order }: OrderCardProps) {
                     <span className="font-bold">(x{product.quantity})</span>
                   </dt>
                   <dd className="text-gray-900">
-                    {product.productName}
-                    {!product.product && (
-                      <span className="text-xs text-red-500 ml-2">(descontinuado)</span>
-                    )}
+                    <div className="flex flex-col">
+                      <span>{product.productName}</span>
+                      {product.variantName && (
+                        <span className="text-sm text-orange-600 font-medium">
+                          Variante: {product.variantName}
+                        </span>
+                      )}
+                      {!product.product && (
+                        <span className="text-xs text-red-500">(descontinuado)</span>
+                      )}
+                    </div>
                   </dd>
                 </div>
                 <Image
@@ -253,7 +267,7 @@ export default function OrderCard({ order }: OrderCardProps) {
                 className="flex-1 py-3 px-6 cursor-pointer bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isDeleting ? (
-                  <div className="w-5 h-5  border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-5 h-5  border-2 border-orange-200 border-t-orange-600 rounded-full animate-spin"></div>
                 ) : (
                   <>
                     <Trash2 size={18} />

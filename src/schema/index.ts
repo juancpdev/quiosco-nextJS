@@ -16,7 +16,9 @@ export const OrderSchema = z.object({
       price: z.number(),
       quantity: z.number(),
       subtotal: z.number(),
-      image: z.string()
+      image: z.string(),
+      variantId: z.number().optional().nullable(),
+      variantName: z.string().optional().nullable()
     })
   ).min(1, 'Debe haber al menos un producto'),
   paymentInfo: z.any().optional(),

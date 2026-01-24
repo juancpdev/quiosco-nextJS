@@ -23,6 +23,7 @@ export async function getProducts(skip: number, take: number) {
     skip,
     include: {
       category: true,
+      variants: true,
     },
   });
 

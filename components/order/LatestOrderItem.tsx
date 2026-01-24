@@ -127,7 +127,7 @@ export default function LatestOrderItem({ order, isNew = false }: OrderCardProps
           <div className="space-y-3">
             {visibleProducts.map((item) => (
               <div
-                key={item.id}
+                key={`product-${order.id}-${item.id}`}
                 className="flex items-center gap-4 pb-3 border-b border-gray-100 last:border-0 last:pb-0"
               >
                 {/* Imagen del producto */}
@@ -147,6 +147,11 @@ export default function LatestOrderItem({ order, isNew = false }: OrderCardProps
                       <p className="font-semibold text-gray-900 truncate">
                         {item.productName}
                       </p>
+                      {item.variantName && (
+                        <p className="text-sm text-orange-600 font-medium truncate">
+                          Variante: {item.variantName}
+                        </p>
+                      )}
                       <div className="flex items-center gap-2 mt-1">
                         <span className="inline-flex items-center justify-center w-6 h-6 bg-orange-100 text-orange-600 rounded-full text-xs font-bold">
                           {item.quantity}
@@ -155,13 +160,6 @@ export default function LatestOrderItem({ order, isNew = false }: OrderCardProps
                           {item.quantity > 1 ? 'unidades' : 'unidad'}
                         </span>
                       </div>
-                    </div>
-
-                    {/* Precio */}
-                    <div className="text-right ml-3">
-                      <p className="text-sm font-bold text-amber-500">
-                        ${item.productPrice}
-                      </p>
                     </div>
                   </div>
 

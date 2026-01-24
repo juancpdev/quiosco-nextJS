@@ -120,7 +120,7 @@ export default function CreateTableModal({ onClose }: CreateTableModalProps) {
             >
               {isLoading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-orange-200 border-t-orange-600 rounded-full animate-spin"></div>
                   <span>Creando...</span>
                 </>
               ) : (

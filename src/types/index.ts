@@ -15,8 +15,14 @@ export type OrderItem = Pick<Product, "id" | "image" | "name"> & {
   itemKey: string;
 };
 
+// Extensión del tipo OrderProducts para incluir variantes
+export type OrderProductsWithVariants = OrderProducts & {
+  variantId?: number | null;
+  variantName?: string | null;
+};
+
 export type OrderWithProducts = Order & {
-  orderProducts: (OrderProducts & {
+  orderProducts: (OrderProductsWithVariants & {
     product: Product | null;
   })[];
 };
